@@ -1,7 +1,7 @@
 import fs from "fs-extra";
 
 // extra
-import type { IWeaponAscension, IWeaponAffix, IWeaponType } from "../../modules/core/interface";
+import type { IWeaponAscension, IWeaponAffix, IWeaponType } from "../../genshin-mirror/modules/core/interface";
 import { DATA_DIR, toAttrType, toCurve, toNum, toWeaponType, toText, toID, saveTranslation, toDesc, toAttr, affixMap, toItem } from "../util";
 import { uniqBy } from "lodash";
 

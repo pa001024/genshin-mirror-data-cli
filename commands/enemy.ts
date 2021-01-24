@@ -1,6 +1,6 @@
 import fs from "fs-extra";
 import { uniqBy } from "lodash";
-import { MonsterRarity } from "../../modules/core/enum";
+import { MonsterRarity } from "../../genshin-mirror/modules/core/enum";
 
 // extra
 import { DATA_DIR, saveTranslation, toDesc, toID, toNum, toText } from "../util";

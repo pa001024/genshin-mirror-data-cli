@@ -2,13 +2,12 @@ import prettier from "prettier";
 import fs from "fs-extra";
 import chalk from "chalk";
 
-import { BuffType, ElementType, WeaponType } from "../modules/core/enum";
-import type { IAttr, IWeaponAffix } from "../modules/core/interface";
-import { startCase } from "lodash";
+import { BuffType, ElementType, WeaponType } from "../genshin-mirror/modules/core/enum";
+import type { IAttr } from "../genshin-mirror/modules/core/interface";
 
 export type Dict<T = string> = { [x: string]: T };
 
-export const DATA_DIR = "../../GenshinData/";
+export const DATA_DIR = "./GenshinData/";
 
 export const itemMap = (fs.readJsonSync(DATA_DIR + "Excel/MaterialExcelConfigData.json") as Item[]).reduce<{
   [x: number]: Item;

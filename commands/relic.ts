@@ -2,8 +2,8 @@
 
 import fs from "fs-extra";
 import { uniqBy } from "lodash";
-import { ArtifactType } from "../../modules/core/enum";
-import { IArtifactType, IArtifactSet, IArtifactSetAffix } from "../../modules/core/interface";
+import { ArtifactType } from "../../genshin-mirror/modules/core/enum";
+import { IArtifactType, IArtifactSet, IArtifactSetAffix } from "../../genshin-mirror/modules/core/interface";
 
 // extra
 import { DATA_DIR, saveTranslation, toDesc, toAttr, toID, affixMap, toNum } from "../util";

@@ -1,6 +1,6 @@
 import fs from "fs-extra";
-import { BodyType, BuffType, Region } from "../../modules/core/enum";
-import { IAvatar, ISkill, IAscension, IConstellation, IAscensionPhase } from "../../modules/core/interface";
+import { BodyType, BuffType, Region } from "../../genshin-mirror/modules/core/enum";
+import { IAvatar, ISkill, IAscension, IConstellation, IAscensionPhase } from "../../genshin-mirror/modules/core/interface";
 
 // extra
 import { DATA_DIR, Dict, saveTranslation, toNum, toText, toWeaponType, toTags, toElement, toItem, toID, toAttrType, toDesc } from "../util";

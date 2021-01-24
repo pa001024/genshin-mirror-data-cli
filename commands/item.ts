@@ -1,7 +1,7 @@
 import fs from "fs-extra";
 import { uniqBy } from "lodash";
-import { MaterialType } from "../../modules/core/enum";
-import { IItem } from "../../modules/core/interface";
+import { MaterialType } from "../../genshin-mirror/modules/core/enum";
+import { IItem } from "../../genshin-mirror/modules/core/interface";
 
 // extra
 import { DATA_DIR, saveTranslation, toDesc, toID, toText } from "../util";

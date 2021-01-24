@@ -1,6 +1,6 @@
 import fs from "fs-extra";
 import { groupBy, values, map } from "lodash";
-import { BuffType } from "../../modules/core/enum";
+import { BuffType } from "../../genshin-mirror/modules/core/enum";
 
 // extra
 import { DATA_DIR, saveObject, toAttrType, toNum } from "../util";
