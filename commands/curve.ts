@@ -1,5 +1,5 @@
 import fs from "fs-extra";
-import { groupBy, keyBy, map } from "lodash";
+import { groupBy, keyBy, map, values } from "lodash";
 import { BuffType } from "../../genshin-mirror/modules/core/enum";
 
 // extra
@@ -12,6 +12,7 @@ export async function run() {
   await parseChar();
   await parseCoeff();
   await parseMainattr();
+  await parseSubAttr();
   await parsePlayerLevel();
   await parseMonsterLevel();
 }
@@ -164,6 +165,35 @@ async function parseMainattr() {
     return rst;
   }
 }
+
+
+ async function parseSubAttr() {
+  interface ReliquaryAffixData {
+    Id: number;
+    DepotId: number;
+    GroupId: number;
+    PropType: string;
+    PropValue: number;
+    Weight: number;
+    UpgradeWeight: number;
+  }
+
+  const data: ReliquaryAffixData[] = await fs.readJSON(DATA_DIR + "Excel/ReliquaryAffixExcelConfigData.json");
+
+  const normalDepotId = new Set([101, 201, 301, 401, 501]);
+  const normalAffix = data.filter(v => normalDepotId.has(v.DepotId));
+
+  const groups = values(groupBy(normalAffix, v => v.DepotId));
+  const rst = groups.map(group => {
+    const typeMap = groupBy(group, v => v.PropType);
+    return map(typeMap, (val, prop) => {
+      const type = toAttrType(prop);
+      return { type: BuffType[type], values: val.map(v => toNum(v.PropValue)), weight: val[0].Weight };
+    });
+  });
+  await saveObject("curve", "subattr.json", rst);
+}
+
 
 function toMaxLevel(rank: number) {
   return [0, 5, 9, 13, 17, 21][rank];

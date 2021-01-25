@@ -19,7 +19,6 @@ program
   .option("-c, --curve", "处理curve")
   .option("-w, --weapon", "处理weapon")
   .option("-i, --item", "处理item")
-  .option("-s, --subattr", "处理subattr")
   .option("-e, --enemy", "处理enemy")
   .option("-m, --misc", "处理misc")
   .option("-r, --relic", "处理relic")
@@ -42,10 +41,6 @@ program
     if (args.weapon) {
       console.log(`${chalk.green("[CLI]")} processing weapon...`);
       await runCommand("weapon");
-    }
-    if (args.subattr) {
-      console.log(`${chalk.green("[CLI]")} processing subattr...`);
-      await runCommand("subattr");
     }
     if (args.item) {
       console.log(`${chalk.green("[CLI]")} processing items...`);

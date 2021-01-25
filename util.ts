@@ -57,7 +57,7 @@ export function toID(hash: number, lang = "en") {
 }
 
 export async function saveObject(domain: string, file: string, obj: any) {
-  const data = prettier.format(JSON.stringify(obj), { parser: "json" });
+  const data = prettier.format(JSON.stringify(obj), { parser: "json", printWidth: 200 });
   await fs.ensureDir("dist/" + domain);
   await fs.writeFile("dist/" + domain + "/" + file, data);
 }
