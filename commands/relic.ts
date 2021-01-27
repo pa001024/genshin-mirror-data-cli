@@ -3,7 +3,7 @@
 import fs from "fs-extra";
 import { uniqBy } from "lodash";
 import { ArtifactType } from "../../genshin-mirror/modules/core/enum";
-import { IArtifactType, IArtifactSet, IArtifactSetAffix } from "../../genshin-mirror/modules/core/interface";
+import { IArtifactType, IArtifactSet, IArtifactSetLevel } from "../../genshin-mirror/modules/core/interface";
 
 // extra
 import { DATA_DIR, saveTranslation, toDesc, toAttr, toID, affixMap, toNum } from "../util";
@@ -30,27 +30,32 @@ async function parseArtifactSet() {
     const rst = data
       .filter(v => v.EquipAffixId)
       .map(v => {
-        const { name, affixs } = toAffix(v.EquipAffixId);
+        const needs = v.SetNeed;
+        const { name, levels } = toAffix(v.EquipAffixId);
         const item: IArtifactSet = {
           id: v.SetId,
           name,
-          need: v.SetNeed,
           // maxLevel: v.MaxLevel || 1,
-          affixs,
+          levels,
         };
         return item;
+        function toAffix(id: number): { name: string; levels: IArtifactSetLevel[] } {
+          const affixLevels = affixMap[id];
+          const affix = affixLevels[0];
+          return {
+            name: t(affix.NameTextMapHash) || "???",
+            levels: affixLevels.map((v, idx) => {
+              return {
+                need: needs[idx],
+                desc: toDesc(t(v.DescTextMapHash)),
+                attrs: toAttr(v.AddProps),
+                params: v.Param.filter(Boolean).map(toNum),
+              };
+            }),
+          };
+        }
       });
     return uniqBy(rst, "id");
-    function toAffix(id: number): { name: string; affixs: IArtifactSetAffix[] } {
-      const affixLevels = affixMap[id];
-      const affix = affixLevels[0];
-      return {
-        name: t(affix.NameTextMapHash) || "???",
-        affixs: affixLevels.map(v => {
-          return { desc: toDesc(t(affix.DescTextMapHash)), attrs: toAttr(v.AddProps), params: v.Param.filter(Boolean).map(toNum) };
-        }),
-      };
-    }
   });
 }
 async function parseArtifact() {
