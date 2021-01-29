@@ -1,6 +1,6 @@
 import fs from "fs-extra";
 import { BodyType, BuffType, Region } from "../../genshin-mirror/modules/core/enum";
-import { IAvatar, ISkill, IAscension, IConstellation, IAscensionPhase } from "../../genshin-mirror/modules/core/interface";
+import type { IAvatar, ISkill, IAscension, IConstellation, IAscensionPhase, ITalent } from "../../genshin-mirror/modules/core/interface";
 
 // extra
 import { DATA_DIR, Dict, saveTranslation, toNum, toText, toWeaponType, toTags, toElement, toItem, toID, toAttrType, toDesc } from "../util";
@@ -70,7 +70,8 @@ async function parseChar() {
         elemSkill: skills.eSkill,
         elemBurst: skills.qSkill,
         attackSkill: skills.aSkill,
-        c13ns: skills.talents,
+        talents: skills.talents,
+        c13ns: skills.c13ns,
       };
       return avatar;
 
@@ -111,17 +112,19 @@ async function parseChar() {
           aSkill, // 普攻
           eSkill, // E技能
           qSkill: depot.EnergySkill ? toSkill(depot.EnergySkill) : undefined,
-          talents: depot.Talents.filter(Boolean).map(toC13n),
+          c13ns: depot.Talents.filter(Boolean).map(toC13n),
           element: elem ? toElement(elem.CostElemType!) : 0, // 元素
+          talents: depot.InherentProudSkillOpens.filter(v => v.ProudskillGroupId).map(v => toTalent(v.ProudskillGroupId!, v.NeedAvatarPromoteLevel)),
         };
       }
 
       function toC13n(talentId: number) {
         const talent = talentIndex.get(talentId)!;
+        const values = talent.Param.map(toNum).filter(Boolean);
         const rst: IConstellation = {
           name: t(talent.NameTextMapHash),
-          desc: t(talent.DescTextMapHash),
-          values: talent.Param.map(toNum).filter(Boolean),
+          desc: toDesc(t(talent.DescTextMapHash)),
+          values: values.length ? values : undefined,
         };
         return rst;
       }
@@ -137,8 +140,24 @@ async function parseChar() {
         if (proud) {
           const tplLen = proud[0].ParamDescList.map(v => toText(v)).findIndex(v => v === "");
           const valLen = proud[0].Param.findIndex(v => v === 0);
-          rst.paramTpls = proud[0].ParamDescList.slice(0, tplLen).map(v => t(v));
-          rst.paramVals = proud.map(lv => lv.Param.slice(0, valLen).map(toNum));
+          if (tplLen) rst.paramTpls = proud[0].ParamDescList.slice(0, tplLen).map(v => t(v));
+          if (valLen) rst.paramVals = proud.map(lv => lv.Param.slice(0, valLen).map(toNum));
+        }
+        return rst;
+      }
+      function toTalent(proudId: number, needLevel?: number) {
+        const proud = proudSkillIndex[proudId][0];
+        const rst: ITalent = {
+          name: t(proud.NameTextMapHash),
+          desc: toDesc(t(proud.DescTextMapHash)),
+          unlock: needLevel,
+          unlockDesc: toDesc(t(proud.UnlockDescTextMapHash)) || undefined,
+        };
+        if (proud) {
+          const tplLen = proud.ParamDescList.map(v => toText(v)).findIndex(v => v === "");
+          const valLen = proud.Param.findIndex(v => v === 0);
+          if (tplLen) rst.tpl = proud.ParamDescList.slice(0, tplLen).map(v => t(v));
+          if (valLen) rst.values = proud.Param.slice(0, valLen).map(toNum);
         }
         return rst;
       }

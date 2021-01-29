@@ -56,8 +56,8 @@ export function toID(hash: number, lang = "en") {
   return locales[lang][hash].replace(/\W+/g, "");
 }
 
-export async function saveObject(domain: string, file: string, obj: any) {
-  const data = prettier.format(JSON.stringify(obj), { parser: "json", printWidth: 200 });
+export async function saveObject(domain: string, file: string, obj: any, options?: any) {
+  const data = prettier.format(JSON.stringify(obj), { parser: "json", printWidth: 200, ...options });
   await fs.ensureDir("dist/" + domain);
   await fs.writeFile("dist/" + domain + "/" + file, data);
 }

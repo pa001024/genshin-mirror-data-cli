@@ -22,6 +22,7 @@ program
   .option("-e, --enemy", "处理enemy")
   .option("-m, --misc", "处理misc")
   .option("-r, --relic", "处理relic")
+  .option("-l, --locale", "处理i18n locales")
   .action(async args => {
     // 输出前清理
     if (args.output) {
@@ -61,6 +62,10 @@ program
     if (args.relic) {
       console.log(`${chalk.green("[CLI]")} processing relic...`);
       await runCommand("relic");
+    }
+    if (args.locale) {
+      console.log(`${chalk.green("[CLI]")} processing i18n...`);
+      await runCommand("i18n");
     }
 
     /// 输出
