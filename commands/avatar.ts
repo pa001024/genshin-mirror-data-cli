@@ -120,7 +120,7 @@ async function parseChar() {
 
       function toC13n(talentId: number) {
         const talent = talentIndex.get(talentId)!;
-        const values = talent.Param.map(toNum).filter(Boolean);
+        const values = talent.ParamList.map(toNum).filter(Boolean);
         const rst: IConstellation = {
           name: t(talent.NameTextMapHash),
           desc: toDesc(t(talent.DescTextMapHash)),
@@ -139,9 +139,9 @@ async function parseChar() {
         if (skill.CostElemVal) rst.energyCost = skill.CostElemVal;
         if (proud) {
           const tplLen = proud[0].ParamDescList.map(v => toText(v)).findIndex(v => v === "");
-          const valLen = proud[0].Param.findIndex(v => v === 0);
+          const valLen = proud[0].ParamList.findIndex(v => v === 0);
           if (tplLen) rst.paramTpls = proud[0].ParamDescList.slice(0, tplLen).map(v => t(v));
-          if (valLen) rst.paramVals = proud.map(lv => lv.Param.slice(0, valLen).map(toNum));
+          if (valLen) rst.paramVals = proud.map(lv => lv.ParamList.slice(0, valLen).map(toNum));
         }
         return rst;
       }
@@ -155,15 +155,15 @@ async function parseChar() {
         };
         if (proud) {
           const tplLen = proud.ParamDescList.map(v => toText(v)).findIndex(v => v === "");
-          const valLen = proud.Param.findIndex(v => v === 0);
+          const valLen = proud.ParamList.findIndex(v => v === 0);
           if (tplLen) rst.tpl = proud.ParamDescList.slice(0, tplLen).map(v => t(v));
-          if (valLen) rst.values = proud.Param.slice(0, valLen).map(toNum);
+          if (valLen) rst.values = proud.ParamList.slice(0, valLen).map(toNum);
         }
         return rst;
       }
 
       function toRegion(char: AvatarExcelConfigData, tags: ReturnType<typeof toTags>) {
-        const ids = new Set(tags.map(v => v.TagId));
+        const ids = new Set(tags.map(v => v.TagID));
         if (ids.has(1001)) return Region.Mondstadt;
         if (ids.has(1002)) return Region.Liyue;
         if (ids.has(1003)) return Region.Inazuma;
@@ -322,7 +322,7 @@ interface AvatarTalentExcelConfigData {
   MainCostItemCount: number;
   OpenConfig: string;
   AddProps: AddProp[];
-  Param: number[];
+  ParamList: number[];
   PrevTalent?: number;
 }
 
@@ -342,12 +342,13 @@ interface ProudSkillExcelConfigData {
   Icon: string;
   CostItems: CostItem[];
   FilterConds: string[];
-  BreakLevel?: number;
+  BreakLevel: number;
   ParamDescList: number[];
   LifeEffectParams: string[];
   OpenConfig: string;
   AddProps: AddProp[];
-  Param: number[];
-  LifeEffectType?: string;
+  ParamList: number[];
+  LifeEffectType: string;
   CoinCost?: number;
+  EffectiveForTeam?: number;
 }

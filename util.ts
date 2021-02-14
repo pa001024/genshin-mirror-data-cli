@@ -26,7 +26,7 @@ export const affixMap = (fs.readJSONSync(DATA_DIR + "Excel/EquipAffixExcelConfig
 
 export const tagMap = (fs.readJsonSync(DATA_DIR + "Excel/FeatureTagExcelConfigData.json") as FeatureTagExcelConfigData[]).reduce<{
   [x: number]: FeatureTagExcelConfigData;
-}>((r, v) => ((r[v.TagId] = v), r), {});
+}>((r, v) => ((r[v.TagID] = v), r), {});
 
 export const tagGroupMap = (fs.readJsonSync(DATA_DIR + "Excel/FeatureTagGroupExcelConfigData.json") as FeatureTagGroupExcelConfigData[]).reduce<{
   [x: number]: FeatureTagGroupExcelConfigData;
@@ -131,7 +131,7 @@ export function toElement(skill: string) {
 
 export function toTags(id: number) {
   const group = tagGroupMap[id];
-  return group.TagIds.filter(Boolean).map(v => tagMap[v]);
+  return group.TagIDs.filter(Boolean).map(v => tagMap[v]);
 }
 
 export function toAttrType(str: string) {
@@ -249,7 +249,7 @@ interface WeaponAffixData {
   DescTextMapHash: number;
   OpenConfig: string;
   AddProps: WeaponAffixAddProp[];
-  Param: number[];
+  ParamList: number[];
   Level?: number;
 }
 
@@ -259,11 +259,11 @@ interface WeaponAffixAddProp {
 }
 
 interface FeatureTagExcelConfigData {
-  TagId: number;
+  TagID: number;
   TagName: string;
   TagDesp: string;
 }
 interface FeatureTagGroupExcelConfigData {
   GroupId: number;
-  TagIds: number[];
+  TagIDs: number[];
 }

@@ -20,7 +20,7 @@ async function parseTeamResonance() {
     DescTextMapHash: number;
     OpenConfig: string;
     AddProps: any[];
-    Param: number[];
+    ParamList: number[];
     WaterAvatarCount?: number;
     WindAvatarCount?: number;
     ElectricAvatarCount?: number;
@@ -41,7 +41,7 @@ async function parseTeamResonance() {
         name: toText(v.NameTextMapHash),
         localeName: t(v.NameTextMapHash),
         desc: toDesc(t(v.DescTextMapHash)),
-        param: v.Param.map(toNum),
+        param: v.ParamList.map(toNum),
       };
       return item;
     });

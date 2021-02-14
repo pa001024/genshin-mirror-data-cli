@@ -1,7 +1,7 @@
 import fs from "fs-extra";
 
 // extra
-import type { IWeaponAscension, IWeaponAffix, IWeaponType } from "../../genshin-mirror/modules/core/interface";
+import type { IWeaponAscension, IWeaponAffix, IWeapon } from "../../genshin-mirror/modules/core/interface";
 import { DATA_DIR, toAttrType, toCurve, toNum, toWeaponType, toText, toID, saveTranslation, toDesc, toAttr, affixMap, toItem } from "../util";
 import { uniqBy } from "lodash";
 
@@ -26,7 +26,7 @@ export async function run() {
       })
       .map(v => {
         const promote = promoteMap[v.WeaponPromoteId];
-        const rst: IWeaponType = {
+        const rst: IWeapon = {
           id: toID(v.NameTextMapHash),
           name: toText(v.NameTextMapHash),
           localeName: t(v.NameTextMapHash),
@@ -74,7 +74,7 @@ export async function run() {
         name: t(affix.NameTextMapHash) || "???",
         desc: toDesc(t(affix.DescTextMapHash)),
         levels: affixLevels.map(v => {
-          return { attrs: toAttr(v.AddProps), params: v.Param.filter(Boolean).map(toNum) };
+          return { attrs: toAttr(v.AddProps), params: v.ParamList.filter(Boolean).map(toNum) };
         }),
       };
     }

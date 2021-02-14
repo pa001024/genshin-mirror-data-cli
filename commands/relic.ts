@@ -19,7 +19,7 @@ async function parseArtifactSet() {
   interface ReliquarySetExcelConfigData {
     SetId: number;
     SetIcon: string;
-    SetNeed: number[];
+    SetNeedNum: number[];
     EquipAffixId: number;
     Contains: number[];
     DisableFilter?: number;
@@ -30,7 +30,7 @@ async function parseArtifactSet() {
     const rst = data
       .filter(v => v.EquipAffixId)
       .map(v => {
-        const needs = v.SetNeed;
+        const needs = v.SetNeedNum;
         const { name, levels } = toAffix(v.EquipAffixId);
         const item: IArtifactSet = {
           id: v.SetId,
@@ -49,7 +49,7 @@ async function parseArtifactSet() {
                 need: needs[idx],
                 desc: toDesc(t(v.DescTextMapHash)),
                 attrs: toAttr(v.AddProps),
-                params: v.Param.filter(Boolean).map(toNum),
+                params: v.ParamList.filter(Boolean).map(toNum),
               };
             }),
           };

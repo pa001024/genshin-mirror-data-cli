@@ -1,5 +1,5 @@
 import fs from "fs-extra";
-import { uniqBy } from "lodash";
+import { keyBy, uniqBy } from "lodash";
 import { MaterialType } from "../../genshin-mirror/modules/core/enum";
 import { IItem } from "../../genshin-mirror/modules/core/interface";
 
@@ -39,22 +39,36 @@ async function parseMaterial() {
     StackLimit?: number;
   }
 
+  interface Jump {}
+
+  interface MaterialSourceDataExcelConfigData {
+    Id: number;
+    Name: string;
+    Dungeon: number[];
+    Jump: Jump[];
+    TextList: number[];
+  }
+
   interface ItemUse {
     UseParam: string[];
   }
   const data: MaterialExcelConfigData[] = await fs.readJSON(DATA_DIR + "Excel/MaterialExcelConfigData.json");
+  const srcData: MaterialSourceDataExcelConfigData[] = await fs.readJSON(DATA_DIR + "Excel/MaterialSourceDataExcelConfigData.json");
+  const srcMap = keyBy(srcData, "Id");
 
   await saveTranslation("item", "item.json", t => {
     const rst = data
       .filter(v => {
         if (v.RankLevel && v.MaterialType && v.MaterialType in MaterialType) {
-          const enName = toText(v.NameTextMapHash, "zh-Hans");
-          if (enName.includes("（废弃）") || enName.includes("(test)")) return false;
+          const cnName = toText(v.NameTextMapHash, "zh-Hans");
+          if (cnName.includes("（废弃）") || cnName.includes("(test)") || cnName.includes("（test）")) return false;
           return true;
         }
         return false;
       })
       .map(v => {
+        const src = srcMap[v.Id];
+        const drop = src.TextList.map(t).filter(Boolean);
         const item: IItem = {
           id: toID(v.NameTextMapHash),
           name: toText(v.NameTextMapHash),
@@ -62,6 +76,7 @@ async function parseMaterial() {
           desc: toDesc(t(v.DescTextMapHash)),
           rarity: v.RankLevel,
           type: (MaterialType[v.MaterialType as any] as any) as MaterialType,
+          drop: drop.length ? drop : undefined,
         };
         return item;
       });
