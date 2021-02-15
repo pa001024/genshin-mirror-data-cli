@@ -1,3 +1,4 @@
+import consola from "consola";
 import fs from "fs-extra";
 import { BodyType, BuffType, Region } from "../../genshin-mirror/modules/core/enum";
 import type { IAvatar, ISkill, IAscension, IConstellation, IAscensionPhase, ITalent } from "../../genshin-mirror/modules/core/interface";
@@ -38,7 +39,7 @@ async function parseChar() {
     const id = toText(char.NameTextMapHash).replace(/ /g, "");
     if (id.includes("(Test)") || char.UseType === "AVATAR_ABANDON" || char.UseType === "AVATAR_SYNC_TEST") continue;
     await saveTranslation("char", id + ".json", t => {
-      const tags = toTags(char.FeatureTagGroupId);
+      const tags = toTags(char.FeatureTagGroupID);
       const skills = toSkills(char.SkillDepotId);
       const ascensions = toAscension(char.AvatarPromoteId);
       const ascensionType = ascensions ? ascensions[0].attrs[3].type : 0;
@@ -114,7 +115,7 @@ async function parseChar() {
           qSkill: depot.EnergySkill ? toSkill(depot.EnergySkill) : undefined,
           c13ns: depot.Talents.filter(Boolean).map(toC13n),
           element: elem ? toElement(elem.CostElemType!) : 0, // 元素
-          talents: depot.InherentProudSkillOpens.filter(v => v.ProudskillGroupId).map(v => toTalent(v.ProudskillGroupId!, v.NeedAvatarPromoteLevel)),
+          talents: depot.InherentProudSkillOpens.filter(v => v.ProudSkillGroupId).map(v => toTalent(v.ProudSkillGroupId!, v.NeedAvatarPromoteLevel)),
         };
       }
 
@@ -189,36 +190,36 @@ async function parseChar() {
 
 interface AvatarExcelConfigData {
   BodyType: string;
-  ScriptDataPathHashPre: number;
   ScriptDataPathHashSuffix: number;
+  ScriptDataPathHashPre: number;
   IconName: string;
   SideIconName: string;
   QualityType: string;
   ChargeEfficiency: number;
-  CombatConfigHashPre: number;
   CombatConfigHashSuffix: number;
+  CombatConfigHashPre: number;
   InitialWeapon: number;
   WeaponType: string;
-  ManekinPathHashPre: number;
   ManekinPathHashSuffix: number;
+  ManekinPathHashPre: number;
   ImageName: string;
-  GachaCardNameHashPre?: number;
-  GachaCardNameHashSuffix?: number;
-  GachaImageNameHashPre?: number;
-  GachaImageNameHashSuffix?: number;
+  GachaCardNameHashSuffix: number;
+  GachaCardNameHashPre: number;
+  GachaImageNameHashSuffix: number;
+  GachaImageNameHashPre: number;
   CutsceneShow: string;
   SkillDepotId: number;
   StaminaRecoverSpeed: number;
   CandSkillDepotIds: number[];
-  ManekinJsonConfigHashPre: number;
   ManekinJsonConfigHashSuffix: number;
+  ManekinJsonConfigHashPre: number;
   ManekinMotionConfig: number;
   DescTextMapHash: number;
-  AvatarIdentityType?: string;
+  AvatarIdentityType: string;
   AvatarPromoteId: number;
-  AvatarPromoteRewardLevel: number[];
-  AvatarPromoteRewardId: number[];
-  FeatureTagGroupId: number;
+  AvatarPromoteRewardLevelList: number[];
+  AvatarPromoteRewardIdList: number[];
+  FeatureTagGroupID: number;
   InfoDescTextMapHash: number;
   HpBase: number;
   AttackBase: number;
@@ -226,20 +227,20 @@ interface AvatarExcelConfigData {
   Critical: number;
   CriticalHurt: number;
   PropGrowCurves: PropGrowCurve[];
-  PrefabPathRagdollHashPre: number;
   PrefabPathRagdollHashSuffix: number;
+  PrefabPathRagdollHashPre: number;
   Id: number;
   NameTextMapHash: number;
-  PrefabPathHashPre: number;
   PrefabPathHashSuffix: number;
-  PrefabPathRemoteHashPre: number;
+  PrefabPathHashPre: number;
   PrefabPathRemoteHashSuffix: number;
-  ControllerPathHashPre: number;
+  PrefabPathRemoteHashPre: number;
   ControllerPathHashSuffix: number;
-  ControllerPathRemoteHashPre: number;
+  ControllerPathHashPre: number;
   ControllerPathRemoteHashSuffix: number;
+  ControllerPathRemoteHashPre: number;
   LODPatternName: string;
-  UseType?: string;
+  UseType: string;
   IsRangeAttack?: boolean;
 }
 
@@ -254,23 +255,27 @@ interface AvatarSkillExcelConfigData {
   AbilityName: string;
   DescTextMapHash: number;
   SkillIcon: string;
-  CostStamina?: number;
+  CostStamina: number;
   MaxChargeNum: number;
   LockShape: string;
   LockWeightParams: number[];
-  IsAttackCameraLock?: boolean;
+  IsAttackCameraLock: boolean;
   BuffIcon: string;
   GlobalValueKey: string;
   CdTime?: number;
-  TriggerId?: number;
-  DragType?: string;
+  TriggerID?: number;
+  DragType: string;
   ShowIconArrow?: boolean;
   ProudSkillGroupId?: number;
-  CostElemType?: string;
+  CostElemType: string;
   CostElemVal?: number;
+  IgnoreCDMinusRatio?: boolean;
   IsRanged?: boolean;
-  NeedMonitor?: string;
+  NeedMonitor: string;
   DefaultLocked?: boolean;
+  NeedStore?: boolean;
+  CdSlot?: number;
+  ForceCanDoSkill?: boolean;
   EnergyMin?: number;
 }
 
@@ -289,12 +294,12 @@ interface AvatarSkillDepotExcelConfigData {
 }
 
 interface InherentProudSkillOpen {
-  ProudskillGroupId?: number;
+  ProudSkillGroupId?: number;
   NeedAvatarPromoteLevel?: number;
 }
 
 interface InherentProudSkillOpen {
-  ProudskillGroupId?: number;
+  ProudSkillGroupId?: number;
   NeedAvatarPromoteLevel?: number;
 }
 interface AvatarPromoteExcelConfigData {

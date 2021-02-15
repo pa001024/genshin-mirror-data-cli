@@ -30,7 +30,7 @@ export const tagMap = (fs.readJsonSync(DATA_DIR + "Excel/FeatureTagExcelConfigDa
 
 export const tagGroupMap = (fs.readJsonSync(DATA_DIR + "Excel/FeatureTagGroupExcelConfigData.json") as FeatureTagGroupExcelConfigData[]).reduce<{
   [x: number]: FeatureTagGroupExcelConfigData;
-}>((r, v) => ((r[v.GroupId] = v), r), {});
+}>((r, v) => ((r[v.GroupID] = v), r), {});
 
 export const locales: Dict = {
   // de: fs.readJsonSync(DATA_DIR + "TextMap/TextDE.json"),
@@ -73,7 +73,7 @@ export function toDesc(raw: string) {
 // 生成大段文字的国际化文件
 export async function saveTranslation(domain: string, file: string, produce: (t: (hash: number) => string) => any) {
   for (const lang in locales) {
-    const t = (n: number) => toText(n, lang);
+    const t = (n: number) => toText(n, lang) || toText(n, "zh-Hant");
     const obj = produce(t);
     await saveObject(lang + "/" + domain, file, obj);
   }
@@ -126,7 +126,7 @@ export function toElement(skill: string) {
     WATER: ElementType.Hydro,
     WIND: ElementType.Anemo,
   };
-  return nm[skill];
+  return nm[skill.toUpperCase()];
 }
 
 export function toTags(id: number) {
@@ -264,6 +264,6 @@ interface FeatureTagExcelConfigData {
   TagDesp: string;
 }
 interface FeatureTagGroupExcelConfigData {
-  GroupId: number;
+  GroupID: number;
   TagIDs: number[];
 }
