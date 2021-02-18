@@ -21,8 +21,8 @@ export const locales: Dict = {
   // ru: fs.readJsonSync(DATA_DIR + "TextMap/TextRU.json"),
   // th: fs.readJsonSync(DATA_DIR + "TextMap/TextTH.json"),
   // vi: fs.readJsonSync(DATA_DIR + "TextMap/TextVI.json"),
-  "zh-Hans": fs.readJsonSync(DATA_DIR + "TextMap/TextZHS.json"),
-  "zh-Hant": fs.readJsonSync(DATA_DIR + "TextMap/TextZHT.json"),
+  "zh-Hans": fs.readJsonSync(DATA_DIR + "TextMap/TextCHS.json"),
+  "zh-Hant": fs.readJsonSync(DATA_DIR + "TextMap/TextCHT.json"),
 };
 
 export const itemMap = (fs.readJsonSync(DATA_DIR + "Excel/MaterialExcelConfigData.json") as Item[]).reduce<{
