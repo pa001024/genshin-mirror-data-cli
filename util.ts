@@ -9,9 +9,29 @@ export type Dict<T = string> = { [x: string]: T };
 
 export const DATA_DIR = "./GenshinData/";
 
+export const locales: Dict = {
+  // de: fs.readJsonSync(DATA_DIR + "TextMap/TextDE.json"),
+  en: fs.readJsonSync(DATA_DIR + "TextMap/TextEN.json"),
+  // es: fs.readJsonSync(DATA_DIR + "TextMap/TextES.json"),
+  // fr: fs.readJsonSync(DATA_DIR + "TextMap/TextFR.json"),
+  // id: fs.readJsonSync(DATA_DIR + "TextMap/TextID.json"),
+  ja: fs.readJsonSync(DATA_DIR + "TextMap/TextJA.json"),
+  // ko: fs.readJsonSync(DATA_DIR + "TextMap/TextKO.json"),
+  // pt: fs.readJsonSync(DATA_DIR + "TextMap/TextPT.json"),
+  // ru: fs.readJsonSync(DATA_DIR + "TextMap/TextRU.json"),
+  // th: fs.readJsonSync(DATA_DIR + "TextMap/TextTH.json"),
+  // vi: fs.readJsonSync(DATA_DIR + "TextMap/TextVI.json"),
+  "zh-Hans": fs.readJsonSync(DATA_DIR + "TextMap/TextZHS.json"),
+  "zh-Hant": fs.readJsonSync(DATA_DIR + "TextMap/TextZHT.json"),
+};
+
 export const itemMap = (fs.readJsonSync(DATA_DIR + "Excel/MaterialExcelConfigData.json") as Item[]).reduce<{
-  [x: number]: Item;
-}>((r, v) => ((r[v.Id] = v), r), {});
+  [x: string]: Item;
+}>((r, v) => {
+  r[v.Id] = v;
+  r[toID(v.NameTextMapHash)] = v;
+  return r;
+}, {});
 
 export const affixMap = (fs.readJSONSync(DATA_DIR + "Excel/EquipAffixExcelConfigData.json") as WeaponAffixData[]).reduce<{
   [x: number]: WeaponAffixData[];
@@ -32,22 +52,6 @@ export const tagGroupMap = (fs.readJsonSync(DATA_DIR + "Excel/FeatureTagGroupExc
   [x: number]: FeatureTagGroupExcelConfigData;
 }>((r, v) => ((r[v.GroupID] = v), r), {});
 
-export const locales: Dict = {
-  // de: fs.readJsonSync(DATA_DIR + "TextMap/TextDE.json"),
-  en: fs.readJsonSync(DATA_DIR + "TextMap/TextEN.json"),
-  // es: fs.readJsonSync(DATA_DIR + "TextMap/TextES.json"),
-  // fr: fs.readJsonSync(DATA_DIR + "TextMap/TextFR.json"),
-  // id: fs.readJsonSync(DATA_DIR + "TextMap/TextID.json"),
-  ja: fs.readJsonSync(DATA_DIR + "TextMap/TextJA.json"),
-  // ko: fs.readJsonSync(DATA_DIR + "TextMap/TextKO.json"),
-  // pt: fs.readJsonSync(DATA_DIR + "TextMap/TextPT.json"),
-  // ru: fs.readJsonSync(DATA_DIR + "TextMap/TextRU.json"),
-  // th: fs.readJsonSync(DATA_DIR + "TextMap/TextTH.json"),
-  // vi: fs.readJsonSync(DATA_DIR + "TextMap/TextVI.json"),
-  "zh-Hans": fs.readJsonSync(DATA_DIR + "TextMap/TextZHS.json"),
-  "zh-Hant": fs.readJsonSync(DATA_DIR + "TextMap/TextZHT.json"),
-};
-
 export function toText(hash: number, lang = "en") {
   return locales[lang][hash];
 }
@@ -62,7 +66,7 @@ export async function saveObject(domain: string, file: string, obj: any, options
   await fs.writeFile("dist/" + domain + "/" + file, data);
 }
 
-export function toItem(id: number) {
+export function toItem(id: number | string) {
   return itemMap[id];
 }
 
@@ -218,9 +222,9 @@ export function debase62(src: string): number {
 
 interface Item {
   InteractionTitleTextMapHash: number;
-  MaterialType: string;
-  StackLimit: number;
+  NoFirstGetHint?: boolean;
   ItemUse: ItemUse[];
+  RankLevel: number;
   EffectDescTextMapHash: number;
   SpecialDescTextMapHash: number;
   TypeDescTextMapHash: number;
@@ -235,7 +239,11 @@ interface Item {
   DescTextMapHash: number;
   Icon: string;
   ItemType: string;
-  Rank: number;
+  Rank?: number;
+  EffectGadgetId?: number;
+  MaterialType?: string;
+  GadgetId?: number;
+  StackLimit?: number;
 }
 
 interface ItemUse {

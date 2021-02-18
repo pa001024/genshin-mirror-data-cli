@@ -1,7 +1,6 @@
 import fs from "fs-extra";
-
 // extra
-import type { IWeaponAscension, IWeaponAffix, IWeapon } from "../../genshin-mirror/modules/core/interface";
+import type { IWeaponAscension, IWeaponAffix, IWeapon, IItem } from "../../genshin-mirror/modules/core/interface";
 import { DATA_DIR, toAttrType, toCurve, toNum, toWeaponType, toText, toID, saveTranslation, toDesc, toAttr, affixMap, toItem } from "../util";
 import { uniqBy } from "lodash";
 
@@ -37,6 +36,9 @@ export async function run() {
           baseATK: toNum(v.WeaponProp[0].InitValue!),
           baseATKCurve: toCurve(v.WeaponProp[0].Type),
         };
+        if (rst.ascensions.length > 5) {
+          rst.overviewItems = rst.ascensions[5].cost.map(toOverviewItem);
+        }
         if (v.WeaponProp[1].PropType && v.WeaponProp[1].InitValue)
           rst.subAttr = {
             type: toAttrType(v.WeaponProp[1].PropType),
@@ -77,6 +79,10 @@ export async function run() {
           return { attrs: toAttr(v.AddProps), params: v.ParamList.filter(Boolean).map(toNum) };
         }),
       };
+    }
+    function toOverviewItem(ci: { id: string }) {
+      const item = toItem(ci.id!);
+      return { id: toID(item.NameTextMapHash), name: t(item.NameTextMapHash), rarity: item.RankLevel } as IItem;
     }
   });
 }

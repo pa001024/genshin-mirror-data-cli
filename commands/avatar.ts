@@ -1,7 +1,7 @@
-import consola from "consola";
 import fs from "fs-extra";
+import { findLastIndex, uniqWith } from "lodash";
 import { BodyType, BuffType, Region } from "../../genshin-mirror/modules/core/enum";
-import type { IAvatar, ISkill, IAscension, IConstellation, IAscensionPhase, ITalent } from "../../genshin-mirror/modules/core/interface";
+import type { IAvatar, ISkill, IAscension, IConstellation, IAscensionPhase, ITalent, IItemStack, IItem } from "../../genshin-mirror/modules/core/interface";
 
 // extra
 import { DATA_DIR, Dict, saveTranslation, toNum, toText, toWeaponType, toTags, toElement, toItem, toID, toAttrType, toDesc } from "../util";
@@ -74,6 +74,17 @@ async function parseChar() {
         talents: skills.talents,
         c13ns: skills.c13ns,
       };
+      if (skills.items) {
+        avatar.overviewItems = uniqWith(
+          [
+            ...avatar.ascensions[5].itemCost
+              .map(v => toItem(v.id))
+              .map(item => ({ id: toID(item.NameTextMapHash), name: t(item.NameTextMapHash), rarity: item.RankLevel })),
+            ...skills.items,
+          ],
+          (a, b) => a.id === b.id
+        );
+      }
       return avatar;
 
       function toAscension(aid: number) {
@@ -116,6 +127,7 @@ async function parseChar() {
           c13ns: depot.Talents.filter(Boolean).map(toC13n),
           element: elem ? toElement(elem.CostElemType!) : 0, // 元素
           talents: depot.InherentProudSkillOpens.filter(v => v.ProudSkillGroupId).map(v => toTalent(v.ProudSkillGroupId!, v.NeedAvatarPromoteLevel)),
+          items: toSkillItems(depot.Skills.filter(Boolean)[0]),
         };
       }
 
@@ -140,11 +152,29 @@ async function parseChar() {
         if (skill.CostElemVal) rst.energyCost = skill.CostElemVal;
         if (proud) {
           const tplLen = proud[0].ParamDescList.map(v => toText(v)).findIndex(v => v === "");
-          const valLen = proud[0].ParamList.findIndex(v => v === 0);
+          const valLen = findLastIndex(proud[0].ParamList, v => v !== 0) + 1;
           if (tplLen) rst.paramTpls = proud[0].ParamDescList.slice(0, tplLen).map(v => t(v));
           if (valLen) rst.paramVals = proud.map(lv => lv.ParamList.slice(0, valLen).map(toNum));
+          rst.costItems = proud.slice(1, 10).map(lv => lv.CostItems.filter(v => v.Id).map(toItemStack));
         }
         return rst;
+      }
+      function toSkillItems(skillId: number) {
+        const skill = skillIndex.get(skillId)!;
+        const proud = (skill.ProudSkillGroupId && proudSkillIndex[skill.ProudSkillGroupId]) || undefined;
+        if (proud) {
+          const costItems = proud[8].CostItems.filter(v => v.Id).map(toOverviewItem);
+          return costItems;
+        }
+        return [];
+      }
+      function toOverviewItem(ci: CostItem) {
+        const item = toItem(ci.Id!);
+        return { id: toID(item.NameTextMapHash), name: t(item.NameTextMapHash), rarity: item.RankLevel } as IItem;
+      }
+      function toItemStack(ci: CostItem) {
+        const item = toItem(ci.Id!);
+        return { id: toID(item.NameTextMapHash), name: t(item.NameTextMapHash), count: ci.Count } as IItemStack;
       }
       function toTalent(proudId: number, needLevel?: number) {
         const proud = proudSkillIndex[proudId][0];
