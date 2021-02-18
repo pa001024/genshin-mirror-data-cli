@@ -4,6 +4,7 @@ import chalk from "chalk";
 
 import { BuffType, ElementType, WeaponType } from "../genshin-mirror/modules/core/enum";
 import type { IAttr } from "../genshin-mirror/modules/core/interface";
+import { startCase } from "lodash";
 
 export type Dict<T = string> = { [x: string]: T };
 
@@ -57,7 +58,11 @@ export function toText(hash: number, lang = "en") {
 }
 
 export function toID(hash: number, lang = "en") {
-  return locales[lang][hash].replace(/\W+/g, "");
+  return locales[lang][hash]
+    .split(/\s+/g)
+    .map(v => startCase(v))
+    .join("")
+    .replace(/\W+/g, "");
 }
 
 export async function saveObject(domain: string, file: string, obj: any, options?: any) {
