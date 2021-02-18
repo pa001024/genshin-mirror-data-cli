@@ -59,9 +59,11 @@ async function parseMaterial() {
   await saveTranslation("item", "item.json", t => {
     const rst = data
       .filter(v => {
-        if (v.RankLevel && v.MaterialType && v.MaterialType in MaterialType) {
+        if (v.Id === 110000) return false;
+        if (v.MaterialType && v.MaterialType in MaterialType) {
           const cnName = toText(v.NameTextMapHash, "zh-Hans");
-          if (cnName.includes("（废弃）") || cnName.includes("(test)") || cnName.includes("（test）")) return false;
+          const cnType = toText(v.TypeDescTextMapHash, "zh-Hans");
+          if (!cnType || cnName.includes("（废弃）") || cnName.includes("(test)") || cnName.includes("（test）")) return false;
           return true;
         }
         return false;
@@ -74,8 +76,9 @@ async function parseMaterial() {
           name: toText(v.NameTextMapHash),
           localeName: t(v.NameTextMapHash),
           desc: toDesc(t(v.DescTextMapHash)),
-          rarity: v.RankLevel,
+          rarity: v.RankLevel || 1,
           type: (MaterialType[v.MaterialType as any] as any) as MaterialType,
+          typeText: t(v.TypeDescTextMapHash),
           drop: drop.length ? drop : undefined,
         };
         return item;

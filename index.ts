@@ -19,6 +19,7 @@ program
   .option("-c, --curve", "处理curve")
   .option("-w, --weapon", "处理weapon")
   .option("-i, --item", "处理item")
+  .option("-I, --itemimg", "处理itemimg")
   .option("-e, --enemy", "处理enemy")
   .option("-m, --misc", "处理misc")
   .option("-r, --relic", "处理relic")
@@ -46,6 +47,10 @@ program
     if (args.item) {
       console.log(`${chalk.green("[CLI]")} processing items...`);
       await runCommand("item");
+    }
+    if (args.itemimg) {
+      console.log(`${chalk.green("[CLI]")} processing itemimg...`);
+      await runCommand("itemimg");
     }
     if (args.enemy) {
       console.log(`${chalk.green("[CLI]")} processing enemy...`);
