@@ -53,6 +53,10 @@ export const tagGroupMap = (fs.readJsonSync(DATA_DIR + "Excel/FeatureTagGroupExc
   [x: number]: FeatureTagGroupExcelConfigData;
 }>((r, v) => ((r[v.GroupID] = v), r), {});
 
+export const relicSetMap = (fs.readJsonSync(DATA_DIR + "Excel/ReliquarySetExcelConfigData.json") as ReliquarySetExcelConfigData[]).reduce<{
+  [x: number]: ReliquarySetExcelConfigData;
+}>((r, v) => ((r[v.SetId] = v), r), {});
+
 export function toText(hash: number, lang = "en") {
   return locales[lang][hash];
 }
@@ -66,7 +70,7 @@ export function toID(hash: number, lang = "en") {
 }
 
 export async function saveObject(domain: string, file: string, obj: any, options?: any) {
-  const data = prettier.format(JSON.stringify(obj), { parser: "json", printWidth: 200, ...options });
+  const data = prettier.format(JSON.stringify(obj), { parser: "json", printWidth: 300, ...options });
   await fs.ensureDir("dist/" + domain);
   await fs.writeFile("dist/" + domain + "/" + file, data);
 }
@@ -279,4 +283,13 @@ interface FeatureTagExcelConfigData {
 interface FeatureTagGroupExcelConfigData {
   GroupID: number;
   TagIDs: number[];
+}
+
+interface ReliquarySetExcelConfigData {
+  SetId: number;
+  SetIcon: string;
+  SetNeedNum: number[];
+  EquipAffixId: number;
+  ContainsList: number[];
+  DisableFilter?: number;
 }

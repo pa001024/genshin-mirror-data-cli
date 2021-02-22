@@ -113,11 +113,12 @@ async function parseMaterial() {
     return false;
   });
 
+  await fs.ensureDir("tmp/item");
   const TH = 4;
   for (let i = 0; i < items.length; i += TH) {
     const job = async (item: MaterialExcelConfigData) => {
       const id = toID(item.NameTextMapHash);
-      const fn = `tmp/${id}.png`;
+      const fn = `tmp/item/${id}.png`;
       // skip existed files
       if (await fs.pathExists(fn)) return;
 

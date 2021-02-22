@@ -74,9 +74,13 @@ export async function run() {
       const affix = affixLevels[0];
       return {
         name: t(affix.NameTextMapHash) || "???",
-        desc: toDesc(t(affix.DescTextMapHash)),
         levels: affixLevels.map(v => {
-          return { attrs: toAttr(v.AddProps), params: v.ParamList.filter(Boolean).map(toNum) };
+          const attrs = toAttr(v.AddProps);
+          return {
+            desc: toDesc(t(v.DescTextMapHash)),
+            attrs: attrs.length ? attrs : undefined,
+            params: v.ParamList.filter(Boolean).map(toNum),
+          };
         }),
       };
     }

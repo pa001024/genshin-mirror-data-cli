@@ -6,7 +6,7 @@ import { ArtifactType } from "../../genshin-mirror/modules/core/enum";
 import { IArtifactType, IArtifactSet, IArtifactSetLevel } from "../../genshin-mirror/modules/core/interface";
 
 // extra
-import { DATA_DIR, saveTranslation, toDesc, toAttr, toID, affixMap, toNum } from "../util";
+import { DATA_DIR, saveTranslation, toDesc, toAttr, toID, affixMap, toNum, toText, relicSetMap } from "../util";
 
 export async function run() {
   // await fs.emptyDir("dist/item");
@@ -21,7 +21,7 @@ async function parseArtifactSet() {
     SetIcon: string;
     SetNeedNum: number[];
     EquipAffixId: number;
-    Contains: number[];
+    ContainsList: number[];
     DisableFilter?: number;
   }
   const data: ReliquarySetExcelConfigData[] = await fs.readJSON(DATA_DIR + "Excel/ReliquarySetExcelConfigData.json");
@@ -104,15 +104,17 @@ async function parseArtifact() {
     const rst = data
       .filter(v => v.RankLevel && v.SetId && enabledIds.has(v.Id))
       .map(v => {
+        const setname = toID(affixMap[relicSetMap[v.SetId!].EquipAffixId][0].NameTextMapHash);
+        const type = toArtifaceType(v.EquipType);
         const item: IArtifactType = {
           id: v.Id,
-          name: toID(v.NameTextMapHash),
+          name: `${setname}_${type}`,
           localeName: t(v.NameTextMapHash),
           desc: toDesc(t(v.DescTextMapHash)),
           rarity: v.RankLevel!,
           setId: v.SetId!,
           // maxLevel: v.MaxLevel || 1,
-          type: toArtifaceType(v.EquipType),
+          type,
         };
         return item;
       });

@@ -23,6 +23,8 @@ program
   .option("-e, --enemy", "处理enemy")
   .option("-m, --misc", "处理misc")
   .option("-r, --relic", "处理relic")
+  .option("-R, --relicimg", "relicimg")
+  .option("-d, --dungeon", "处理dungeon")
   .option("-l, --locale", "处理i18n locales")
   .action(async args => {
     // 输出前清理
@@ -52,6 +54,10 @@ program
       console.log(`${chalk.green("[CLI]")} processing itemimg...`);
       await runCommand("itemimg");
     }
+    if (args.relicimg) {
+      console.log(`${chalk.green("[CLI]")} processing relicimg...`);
+      await runCommand("relicimg");
+    }
     if (args.enemy) {
       console.log(`${chalk.green("[CLI]")} processing enemy...`);
       await runCommand("enemy");
@@ -67,6 +73,10 @@ program
     if (args.relic) {
       console.log(`${chalk.green("[CLI]")} processing relic...`);
       await runCommand("relic");
+    }
+    if (args.dungeon) {
+      console.log(`${chalk.green("[CLI]")} processing dungeon...`);
+      await runCommand("dungeon");
     }
     if (args.locale) {
       console.log(`${chalk.green("[CLI]")} processing i18n...`);
