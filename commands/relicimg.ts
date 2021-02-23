@@ -94,11 +94,17 @@ async function parseRelicImg() {
           v = v.replace("Traveling", "Travelling");
           v = v.replace("BlizzardStrayer", "Blizzard_walker");
           v = v.replace("HeartOfDepth", "Depth_of_heart");
-          return [`https://genshin.honeyhunterworld.com/img/art/${snakeCase(v)}_70.png`];
+          v = v.replace("PrayersFor", "PrayersOf");
+          v = v.replace("PrayersTo", "PrayersOf");
+          const v2 = v.replace("_3", "_4");
+          return [
+            `https://genshin.honeyhunterworld.com/img/art/${snakeCase(v)}_70.png`,
+            `https://genshin.honeyhunterworld.com/img/art/${snakeCase(v2)}_70.png`,
+          ];
         };
         let noitem = true;
         for (const url of urls(uid)) {
-          const isOK = await axios.head(url).catch(() => {});
+          const isOK = await axios.head(url, { timeout: 5e3 }).catch(() => {});
           if (isOK) {
             const file = await axios.get(url, { responseType: "arraybuffer" });
             await fs.writeFile(fn, file.data);

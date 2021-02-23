@@ -26,24 +26,33 @@ async function parseArtifactSet() {
   }
   const data: ReliquarySetExcelConfigData[] = await fs.readJSON(DATA_DIR + "Excel/ReliquarySetExcelConfigData.json");
 
+  const revMap: { [x: string]: number } = {
+    /* EQUIP_BRACER */ 4: ArtifactType.FlowerOfLife,
+    /* EQUIP_NECKLACE */ 2: ArtifactType.PlumeOfDeath,
+    /* EQUIP_SHOES */ 5: ArtifactType.SandsOfEon,
+    /* EQUIP_RING */ 1: ArtifactType.GobletOfEonothem,
+    /* EQUIP_DRESS */ 3: ArtifactType.CircletOfLogos,
+  };
   await saveTranslation("relicset", "relicset.json", t => {
     const rst = data
       .filter(v => v.EquipAffixId)
       .map(v => {
         const needs = v.SetNeedNum;
-        const { name, levels } = toAffix(v.EquipAffixId);
+        const { name, localeName, levels } = toAffix(v.EquipAffixId);
         const item: IArtifactSet = {
           id: v.SetId,
-          name,
+          name: `${name}_${revMap[v.SetIcon.substr(-1)]}`,
+          localeName,
           // maxLevel: v.MaxLevel || 1,
           levels,
         };
         return item;
-        function toAffix(id: number): { name: string; levels: IArtifactSetLevel[] } {
+        function toAffix(id: number) {
           const affixLevels = affixMap[id];
           const affix = affixLevels[0];
           return {
-            name: t(affix.NameTextMapHash) || "???",
+            name: toID(affix.NameTextMapHash) || "???",
+            localeName: t(affix.NameTextMapHash) || "???",
             levels: affixLevels.map((v, idx) => {
               return {
                 need: needs[idx],
