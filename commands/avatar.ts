@@ -79,7 +79,7 @@ async function parseChar() {
           [
             ...avatar.ascensions[5].itemCost
               .map(v => toItem(v.id))
-              .map(item => ({ id: toID(item.NameTextMapHash), name: t(item.NameTextMapHash), rarity: item.RankLevel })),
+              .map(item => ({ id: toID(item.NameTextMapHash), localeName: t(item.NameTextMapHash), rarity: item.RankLevel })),
             ...skills.items,
           ],
           (a, b) => a.id === b.id
@@ -98,9 +98,9 @@ async function parseChar() {
                 const item = toItem(it.Id!);
                 if (!item) {
                   // console.warn(`[item] ${id}:${it.Id} not found`);
-                  return { id: "unknown", name: "???", count: it.Count! };
+                  return { id: "unknown", localeName: "???", count: it.Count! };
                 }
-                return { id: toID(item.NameTextMapHash), name: t(item.NameTextMapHash), count: it.Count! };
+                return { id: toID(item.NameTextMapHash), localeName: t(item.NameTextMapHash), rarity: item.RankLevel, count: it.Count! };
               }),
               attrs: v.AddProps.filter(p => p.PropType).map(p => {
                 return { type: toAttrType(p.PropType!), value: p.Value ? toNum(p.Value) : 0 };
@@ -172,11 +172,11 @@ async function parseChar() {
       }
       function toOverviewItem(ci: CostItem) {
         const item = toItem(ci.Id!);
-        return { id: toID(item.NameTextMapHash), name: t(item.NameTextMapHash), rarity: item.RankLevel } as IItem;
+        return { id: toID(item.NameTextMapHash), localeName: t(item.NameTextMapHash), rarity: item.RankLevel } as IItem;
       }
       function toItemStack(ci: CostItem) {
         const item = toItem(ci.Id!);
-        return { id: toID(item.NameTextMapHash), name: t(item.NameTextMapHash), count: ci.Count } as IItemStack;
+        return { id: toID(item.NameTextMapHash), localeName: t(item.NameTextMapHash), rarity: item.RankLevel, count: ci.Count } as IItemStack;
       }
       function toTalent(proudId: number, needLevel?: number) {
         const proud = proudSkillIndex[proudId][0];
