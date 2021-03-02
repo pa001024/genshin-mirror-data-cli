@@ -23,7 +23,8 @@ program
   .option("-e, --enemy", "处理enemy")
   .option("-m, --misc", "处理misc")
   .option("-r, --relic", "处理relic")
-  .option("-R, --relicimg", "relicimg")
+  .option("-R, --relicimg", "处理relicimg")
+  .option("-S, --skillimg", "处理skillimg")
   .option("-d, --dungeon", "处理dungeon")
   .option("-l, --locale", "处理i18n locales")
   .action(async args => {
@@ -73,6 +74,10 @@ program
     if (args.relic) {
       console.log(`${chalk.green("[CLI]")} processing relic...`);
       await runCommand("relic");
+    }
+    if (args.skillimg) {
+      console.log(`${chalk.green("[CLI]")} processing skillimg...`);
+      await runCommand("skillimg");
     }
     if (args.dungeon) {
       console.log(`${chalk.green("[CLI]")} processing dungeon...`);

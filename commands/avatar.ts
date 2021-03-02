@@ -135,7 +135,8 @@ async function parseChar() {
         const talent = talentIndex.get(talentId)!;
         const values = talent.ParamList.map(toNum).filter(Boolean);
         const rst: IConstellation = {
-          name: t(talent.NameTextMapHash),
+          name: toID(talent.NameTextMapHash),
+          localeName: t(talent.NameTextMapHash),
           desc: toDesc(t(talent.DescTextMapHash)),
           values: values.length ? values : undefined,
         };
@@ -145,7 +146,8 @@ async function parseChar() {
         const skill = skillIndex.get(skillId)!;
         const proud = (skill.ProudSkillGroupId && proudSkillIndex[skill.ProudSkillGroupId]) || undefined;
         const rst: ISkill = {
-          name: t(skill.NameTextMapHash),
+          name: toID(skill.NameTextMapHash),
+          localeName: t(skill.NameTextMapHash),
           desc: toDesc(t(skill.DescTextMapHash)),
           cd: toNum(skill.CdTime || 0),
         };
@@ -179,7 +181,8 @@ async function parseChar() {
       function toTalent(proudId: number, needLevel?: number) {
         const proud = proudSkillIndex[proudId][0];
         const rst: ITalent = {
-          name: t(proud.NameTextMapHash),
+          name: toID(proud.NameTextMapHash),
+          localeName: t(proud.NameTextMapHash),
           desc: toDesc(t(proud.DescTextMapHash)),
           unlock: needLevel,
           unlockDesc: toDesc(t(proud.UnlockDescTextMapHash)) || undefined,
