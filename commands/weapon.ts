@@ -5,9 +5,9 @@ import { DATA_DIR, toAttrType, toCurve, toNum, toWeaponType, toText, toID, saveT
 import { uniqBy } from "lodash";
 
 export async function run() {
-  const data: WeaponData[] = await fs.readJSON(DATA_DIR + "Excel/WeaponExcelConfigData.json");
+  const data: WeaponData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/WeaponExcelConfigData.json");
   // 突破数据
-  const promoteMap = ((await fs.readJSON(DATA_DIR + "Excel/WeaponPromoteExcelConfigData.json")) as WeaponPromoteData[]).reduce<{
+  const promoteMap = ((await fs.readJSON(DATA_DIR + "ExcelBinOutput/WeaponPromoteExcelConfigData.json")) as WeaponPromoteData[]).reduce<{
     [x: number]: WeaponPromoteData[];
   }>((r, v) => {
     if (!r[v.WeaponPromoteId]) {
@@ -62,9 +62,9 @@ export async function run() {
               const item = toItem(v.Id!);
               if (!item) {
                 // console.warn(`[item] ${id}:${it.Id} not found`);
-                return { id: "unknown", name: "???", count: v.Count! };
+                return { id: "unknown", localeName: "???", count: v.Count! };
               }
-              return { id: toID(item.NameTextMapHash), name: t(item.NameTextMapHash), count: v.Count! };
+              return { id: toID(item.NameTextMapHash), localeName: t(item.NameTextMapHash), count: v.Count! };
             }),
           };
         });

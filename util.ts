@@ -26,7 +26,7 @@ export const locales: Dict = {
   "zh-Hant": fs.readJsonSync(DATA_DIR + "TextMap/TextCHT.json"),
 };
 
-export const itemMap = (fs.readJsonSync(DATA_DIR + "Excel/MaterialExcelConfigData.json") as Item[]).reduce<{
+export const itemMap = (fs.readJsonSync(DATA_DIR + "ExcelBinOutput/MaterialExcelConfigData.json") as Item[]).reduce<{
   [x: string]: Item;
 }>((r, v) => {
   r[v.Id] = v;
@@ -34,7 +34,7 @@ export const itemMap = (fs.readJsonSync(DATA_DIR + "Excel/MaterialExcelConfigDat
   return r;
 }, {});
 
-export const affixMap = (fs.readJSONSync(DATA_DIR + "Excel/EquipAffixExcelConfigData.json") as WeaponAffixData[]).reduce<{
+export const affixMap = (fs.readJSONSync(DATA_DIR + "ExcelBinOutput/EquipAffixExcelConfigData.json") as WeaponAffixData[]).reduce<{
   [x: number]: WeaponAffixData[];
 }>((r, v) => {
   if (!r[v.Id]) {
@@ -45,15 +45,15 @@ export const affixMap = (fs.readJSONSync(DATA_DIR + "Excel/EquipAffixExcelConfig
   return r;
 }, {});
 
-export const tagMap = (fs.readJsonSync(DATA_DIR + "Excel/FeatureTagExcelConfigData.json") as FeatureTagExcelConfigData[]).reduce<{
+export const tagMap = (fs.readJsonSync(DATA_DIR + "ExcelBinOutput/FeatureTagExcelConfigData.json") as FeatureTagExcelConfigData[]).reduce<{
   [x: number]: FeatureTagExcelConfigData;
 }>((r, v) => ((r[v.TagID] = v), r), {});
 
-export const tagGroupMap = (fs.readJsonSync(DATA_DIR + "Excel/FeatureTagGroupExcelConfigData.json") as FeatureTagGroupExcelConfigData[]).reduce<{
+export const tagGroupMap = (fs.readJsonSync(DATA_DIR + "ExcelBinOutput/FeatureTagGroupExcelConfigData.json") as FeatureTagGroupExcelConfigData[]).reduce<{
   [x: number]: FeatureTagGroupExcelConfigData;
 }>((r, v) => ((r[v.GroupID] = v), r), {});
 
-export const relicSetMap = (fs.readJsonSync(DATA_DIR + "Excel/ReliquarySetExcelConfigData.json") as ReliquarySetExcelConfigData[]).reduce<{
+export const relicSetMap = (fs.readJsonSync(DATA_DIR + "ExcelBinOutput/ReliquarySetExcelConfigData.json") as ReliquarySetExcelConfigData[]).reduce<{
   [x: number]: ReliquarySetExcelConfigData;
 }>((r, v) => ((r[v.SetId] = v), r), {});
 

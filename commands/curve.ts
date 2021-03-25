@@ -18,7 +18,7 @@ export async function run() {
 }
 
 async function parseMonsterLevel() {
-  const data: MonsterCurveExcelConfigData[] = await fs.readJSON(DATA_DIR + "Excel/MonsterCurveExcelConfigData.json");
+  const data: MonsterCurveExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/MonsterCurveExcelConfigData.json");
 
   const cols = data[0].CurveInfos.map(v => v.Type);
 
@@ -32,7 +32,7 @@ async function parseMonsterLevel() {
   );
 }
 async function parsePlayerLevel() {
-  const data: PlayerLevelExcelConfigData[] = await fs.readJSON(DATA_DIR + "Excel/PlayerLevelExcelConfigData.json");
+  const data: PlayerLevelExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/PlayerLevelExcelConfigData.json");
 
   await saveObject(
     "curve",
@@ -47,7 +47,7 @@ async function parsePlayerLevel() {
 }
 
 async function parseWeapon() {
-  const data: WeaponCurveExcelConfigData[] = await fs.readJSON(DATA_DIR + "Excel/WeaponCurveExcelConfigData.json");
+  const data: WeaponCurveExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/WeaponCurveExcelConfigData.json");
 
   const rst: WeaponCurveResultData = {};
 
@@ -75,7 +75,7 @@ async function parseChar() {
     Arith: string;
     Value: number;
   }
-  const data: AvatarCurveExcelConfigData[] = await fs.readJSON(DATA_DIR + "Excel/AvatarCurveExcelConfigData.json");
+  const data: AvatarCurveExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/AvatarCurveExcelConfigData.json");
 
   const rst: WeaponCurveResultData = {};
 
@@ -96,7 +96,7 @@ async function parseFetter() {
     FetterLevel: number;
     NeedExp: number;
   }
-  const data: AvatarFettersLevelExcelConfigData[] = await fs.readJSON(DATA_DIR + "Excel/AvatarFettersLevelExcelConfigData.json");
+  const data: AvatarFettersLevelExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/AvatarFettersLevelExcelConfigData.json");
 
   await saveObject("curve", "fetters.json", {
     exp: data.map(v => v.NeedExp),
@@ -104,7 +104,7 @@ async function parseFetter() {
 }
 
 async function parseCoeff() {
-  const data: ElementCoeffExcelConfigData[] = await fs.readJSON(DATA_DIR + "Excel/ElementCoeffExcelConfigData.json");
+  const data: ElementCoeffExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/ElementCoeffExcelConfigData.json");
 
   const rst = {
     crash: data.filter(v => v.Level).map(v => toNum(v.CrashCo)),
@@ -116,8 +116,8 @@ async function parseCoeff() {
 }
 
 async function parseMainattr() {
-  const data: ReliquaryLevelExcelConfigData[] = await fs.readJSON(DATA_DIR + "Excel/ReliquaryLevelExcelConfigData.json");
-  const dropData: ReliquaryMainPropExcelConfigData[] = await fs.readJSON(DATA_DIR + "Excel/ReliquaryMainPropExcelConfigData.json");
+  const data: ReliquaryLevelExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/ReliquaryLevelExcelConfigData.json");
+  const dropData: ReliquaryMainPropExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/ReliquaryMainPropExcelConfigData.json");
 
   const normalData = data.filter(v => v.Rank);
 
@@ -178,7 +178,7 @@ async function parseMainattr() {
     UpgradeWeight: number;
   }
 
-  const data: ReliquaryAffixData[] = await fs.readJSON(DATA_DIR + "Excel/ReliquaryAffixExcelConfigData.json");
+  const data: ReliquaryAffixData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/ReliquaryAffixExcelConfigData.json");
 
   const normalDepotId = new Set([101, 201, 301, 401, 501]);
   const normalAffix = data.filter(v => normalDepotId.has(v.DepotId));

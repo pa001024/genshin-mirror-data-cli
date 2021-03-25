@@ -32,7 +32,7 @@ async function parseTeamResonance() {
   interface ItemUse {
     UseParam: string[];
   }
-  const data: TeamResonanceExcelConfigData[] = await fs.readJSON(DATA_DIR + "Excel/TeamResonanceExcelConfigData.json");
+  const data: TeamResonanceExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/TeamResonanceExcelConfigData.json");
 
   await saveTranslation("misc", "resonance.json", t => {
     const rst = data.map(v => {

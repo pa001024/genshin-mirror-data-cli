@@ -52,8 +52,8 @@ async function parseMaterial() {
   interface ItemUse {
     UseParam: string[];
   }
-  const data: MaterialExcelConfigData[] = await fs.readJSON(DATA_DIR + "Excel/MaterialExcelConfigData.json");
-  const srcData: MaterialSourceDataExcelConfigData[] = await fs.readJSON(DATA_DIR + "Excel/MaterialSourceDataExcelConfigData.json");
+  const data: MaterialExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/MaterialExcelConfigData.json");
+  const srcData: MaterialSourceDataExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/MaterialSourceDataExcelConfigData.json");
   const srcMap = keyBy(srcData, "Id");
 
   await saveTranslation("item", "item.json", t => {

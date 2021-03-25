@@ -24,7 +24,7 @@ async function parseArtifactSet() {
     ContainsList: number[];
     DisableFilter?: number;
   }
-  const data: ReliquarySetExcelConfigData[] = await fs.readJSON(DATA_DIR + "Excel/ReliquarySetExcelConfigData.json");
+  const data: ReliquarySetExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/ReliquarySetExcelConfigData.json");
 
   const revMap: { [x: string]: number } = {
     /* EQUIP_BRACER */ 4: ArtifactType.FlowerOfLife,
@@ -105,8 +105,8 @@ async function parseArtifact() {
     SandId: number;
     SortOrder: number;
   }
-  const data: ReliquaryExcelConfigData[] = await fs.readJSON(DATA_DIR + "Excel/ReliquaryExcelConfigData.json");
-  const codex: ReliquaryCodexExcelConfigData[] = await fs.readJSON(DATA_DIR + "Excel/ReliquaryCodexExcelConfigData.json");
+  const data: ReliquaryExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/ReliquaryExcelConfigData.json");
+  const codex: ReliquaryCodexExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/ReliquaryCodexExcelConfigData.json");
   const enabledIds = new Set<number>([].concat(...codex.map(v => [v.CupId, v.LeatherId, v.CapId, v.FlowerId, v.SandId] as any)));
 
   await saveTranslation("relic", "relic.json", t => {

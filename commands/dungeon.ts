@@ -77,8 +77,8 @@ async function parseDungeon() {
     IsDefaultOpen?: boolean;
   }
 
-  const data: DungeonExcelConfigData[] = await fs.readJSON(DATA_DIR + "Excel/DungeonExcelConfigData.json");
-  const entryData: DungeonEntryExcelConfigData[] = await fs.readJSON(DATA_DIR + "Excel/DungeonEntryExcelConfigData.json");
+  const data: DungeonExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/DungeonExcelConfigData.json");
+  const entryData: DungeonEntryExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/DungeonEntryExcelConfigData.json");
   const entryIndex = new Map(entryData.map(v => [v.Id, v]));
 
   await saveTranslation("dungeon", "dungeon.json", t => {

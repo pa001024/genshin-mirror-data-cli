@@ -81,10 +81,10 @@ async function parseEnemy() {
     TagStr: string;
     MonsterRarity: string;
   }
-  const data: MonsterExcelConfigData[] = await fs.readJSON(DATA_DIR + "Excel/MonsterExcelConfigData.json");
-  const relData: MonsterRelationshipExcelConfigData[] = await fs.readJSON(DATA_DIR + "Excel/MonsterRelationshipExcelConfigData.json");
+  const data: MonsterExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/MonsterExcelConfigData.json");
+  const relData: MonsterRelationshipExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/MonsterRelationshipExcelConfigData.json");
   const relIndex = new Map(relData.map(v => [v.Id, v]));
-  const descData: MonsterDescribeExcelConfigData[] = await fs.readJSON(DATA_DIR + "Excel/MonsterDescribeExcelConfigData.json");
+  const descData: MonsterDescribeExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/MonsterDescribeExcelConfigData.json");
   const descIndex = new Map(descData.map(v => [v.Id, v]));
 
   await saveTranslation("enemy", "enemy.json", t => {

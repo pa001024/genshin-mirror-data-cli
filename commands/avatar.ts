@@ -13,20 +13,20 @@ export async function run() {
 }
 
 async function parseChar() {
-  const data: AvatarExcelConfigData[] = await fs.readJSON(DATA_DIR + "Excel/AvatarExcelConfigData.json");
-  const skillData: AvatarSkillExcelConfigData[] = await fs.readJSON(DATA_DIR + "Excel/AvatarSkillExcelConfigData.json");
+  const data: AvatarExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/AvatarExcelConfigData.json");
+  const skillData: AvatarSkillExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/AvatarSkillExcelConfigData.json");
   const skillIndex = new Map(skillData.map(v => [v.Id, v]));
-  const depotData: AvatarSkillDepotExcelConfigData[] = await fs.readJSON(DATA_DIR + "Excel/AvatarSkillDepotExcelConfigData.json");
+  const depotData: AvatarSkillDepotExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/AvatarSkillDepotExcelConfigData.json");
   const depotIndex = new Map(depotData.map(v => [v.Id, v]));
-  const talentData: AvatarTalentExcelConfigData[] = await fs.readJSON(DATA_DIR + "Excel/AvatarTalentExcelConfigData.json");
+  const talentData: AvatarTalentExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/AvatarTalentExcelConfigData.json");
   const talentIndex = new Map(talentData.map(v => [v.TalentId, v]));
-  const proudSkillData: ProudSkillExcelConfigData[] = await fs.readJSON(DATA_DIR + "Excel/ProudSkillExcelConfigData.json");
+  const proudSkillData: ProudSkillExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/ProudSkillExcelConfigData.json");
   const proudSkillIndex = proudSkillData.reduce<Dict<ProudSkillExcelConfigData[]>>((r, v) => {
     if (v.ProudSkillGroupId in r) r[v.ProudSkillGroupId].push(v);
     else r[v.ProudSkillGroupId] = [v];
     return r;
   }, {});
-  const promoteData: AvatarPromoteExcelConfigData[] = await fs.readJSON(DATA_DIR + "Excel/AvatarPromoteExcelConfigData.json");
+  const promoteData: AvatarPromoteExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/AvatarPromoteExcelConfigData.json");
   const promoteIndex = promoteData.reduce<Dict<AvatarPromoteExcelConfigData[]>>((r, v) => {
     if (v.AvatarPromoteId in r) r[v.AvatarPromoteId].push(v);
     else r[v.AvatarPromoteId] = [v];

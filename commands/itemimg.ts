@@ -43,7 +43,7 @@ async function parseMaterial() {
   interface ItemUse {
     UseParam: string[];
   }
-  const data: MaterialExcelConfigData[] = await fs.readJSON(DATA_DIR + "Excel/MaterialExcelConfigData.json");
+  const data: MaterialExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/MaterialExcelConfigData.json");
 
   const enabled: { [x: string]: (id: string) => string[] } = {
     [MaterialType.MATERIAL_AVATAR_MATERIAL]: (id: string) => {

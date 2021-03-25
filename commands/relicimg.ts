@@ -22,7 +22,7 @@ async function parseRelicImg() {
     ContainsList: number[];
     DisableFilter?: number;
   }
-  const data: ReliquarySetExcelConfigData[] = await fs.readJSON(DATA_DIR + "Excel/ReliquarySetExcelConfigData.json");
+  const data: ReliquarySetExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/ReliquarySetExcelConfigData.json");
   interface ReliquaryExcelConfigData {
     EquipType: string;
     ShowPic: string;
@@ -49,7 +49,7 @@ async function parseRelicImg() {
     InitialLockState?: number;
     Dropable?: boolean;
   }
-  const relics: ReliquaryExcelConfigData[] = await fs.readJSON(DATA_DIR + "Excel/ReliquaryExcelConfigData.json");
+  const relics: ReliquaryExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/ReliquaryExcelConfigData.json");
   const relicMap = relics.reduce<{ [x: number]: ReliquaryExcelConfigData }>((r, v) => (r[v.Id] = v) && r, {});
 
   const items = data
