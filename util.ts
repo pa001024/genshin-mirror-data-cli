@@ -11,19 +11,19 @@ export type Dict<T = string> = { [x: string]: T };
 export const DATA_DIR = "./GenshinData/";
 
 export const locales: Dict = {
-  // de: fs.readJsonSync(DATA_DIR + "TextMap/TextDE.json"),
-  en: fs.readJsonSync(DATA_DIR + "TextMap/TextEN.json"),
-  // es: fs.readJsonSync(DATA_DIR + "TextMap/TextES.json"),
-  // fr: fs.readJsonSync(DATA_DIR + "TextMap/TextFR.json"),
-  // id: fs.readJsonSync(DATA_DIR + "TextMap/TextID.json"),
-  ja: fs.readJsonSync(DATA_DIR + "TextMap/TextJA.json"),
-  // ko: fs.readJsonSync(DATA_DIR + "TextMap/TextKO.json"),
-  // pt: fs.readJsonSync(DATA_DIR + "TextMap/TextPT.json"),
-  // ru: fs.readJsonSync(DATA_DIR + "TextMap/TextRU.json"),
-  // th: fs.readJsonSync(DATA_DIR + "TextMap/TextTH.json"),
-  // vi: fs.readJsonSync(DATA_DIR + "TextMap/TextVI.json"),
-  "zh-Hans": fs.readJsonSync(DATA_DIR + "TextMap/TextCHS.json"),
-  "zh-Hant": fs.readJsonSync(DATA_DIR + "TextMap/TextCHT.json"),
+  // de: fs.readJsonSync(DATA_DIR + "TextMap/TextMapDE.json"),
+  en: fs.readJsonSync(DATA_DIR + "TextMap/TextMapEN.json"),
+  // es: fs.readJsonSync(DATA_DIR + "TextMap/TextMapES.json"),
+  // fr: fs.readJsonSync(DATA_DIR + "TextMap/TextMapFR.json"),
+  // id: fs.readJsonSync(DATA_DIR + "TextMap/TextMapID.json"),
+  ja: fs.readJsonSync(DATA_DIR + "TextMap/TextMapJP.json"),
+  // ko: fs.readJsonSync(DATA_DIR + "TextMap/TextMapKO.json"),
+  // pt: fs.readJsonSync(DATA_DIR + "TextMap/TextMapPT.json"),
+  // ru: fs.readJsonSync(DATA_DIR + "TextMap/TextMapRU.json"),
+  // th: fs.readJsonSync(DATA_DIR + "TextMap/TextMapTH.json"),
+  // vi: fs.readJsonSync(DATA_DIR + "TextMap/TextMapVI.json"),
+  "zh-Hans": fs.readJsonSync(DATA_DIR + "TextMap/TextMapCHS.json"),
+  "zh-Hant": fs.readJsonSync(DATA_DIR + "TextMap/TextMapCHT.json"),
 };
 
 export const itemMap = (fs.readJsonSync(DATA_DIR + "ExcelBinOutput/MaterialExcelConfigData.json") as Item[]).reduce<{
@@ -139,6 +139,7 @@ export function toElement(skill: string) {
     WATER: ElementType.Hydro,
     WIND: ElementType.Anemo,
   };
+  if (!skill.toUpperCase) return 0;
   return nm[skill.toUpperCase()];
 }
 

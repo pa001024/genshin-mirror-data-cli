@@ -9,7 +9,7 @@ const DIR = "../genshin-mirror/locales/";
 let reverseCN: Map<string, number>;
 
 export async function run() {
-  reverseCN = new Map<string, number>(map(fs.readJsonSync(DATA_DIR + "TextMap/TextCHS.json"), (v: string, k: number) => [v, k]).filter(v => v[0]) as any);
+  reverseCN = new Map<string, number>(map(fs.readJsonSync(DATA_DIR + "TextMap/TextMapCHS.json"), (v: string, k: number) => [v, k]).filter(v => v[0]) as any);
   await fs.emptyDir("dist/i18n");
   await parseI18n();
 }
