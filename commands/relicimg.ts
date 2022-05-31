@@ -85,25 +85,15 @@ async function parseRelicImg() {
       const subItems = item.ContainsList.map(v => relicMap[v]);
       for (const sub of subItems) {
         const sid = `${id}_${partMap[sub.EquipType]}`;
-        const uid = `${id}_${urlMap[sub.EquipType]}`;
         const fn = `tmp/relic/${sid}.png`;
         // skip existed files
         if (await fs.pathExists(fn)) return;
 
-        const urls = (v: string) => {
-          v = v.replace("Traveling", "Travelling");
-          v = v.replace("BlizzardStrayer", "Blizzard_walker");
-          v = v.replace("HeartOfDepth", "Depth_of_heart");
-          v = v.replace("PrayersFor", "PrayersOf");
-          v = v.replace("PrayersTo", "PrayersOf");
-          const v2 = v.replace("_3", "_4");
-          return [
-            `https://genshin.honeyhunterworld.com/img/art/${snakeCase(v)}_70.png`,
-            `https://genshin.honeyhunterworld.com/img/art/${snakeCase(v2)}_70.png`,
-          ];
+        const urls = (v: string | number) => {
+          return [`https://genshin.honeyhunterworld.com/img/art/a_${v}.png`];
         };
         let noitem = true;
-        for (const url of urls(uid)) {
+        for (const url of urls(sub.Id)) {
           const isOK = await axios.head(url, { timeout: 5e3 }).catch(() => {});
           if (isOK) {
             const file = await axios.get(url, { responseType: "arraybuffer" });

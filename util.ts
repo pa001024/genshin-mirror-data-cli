@@ -2,9 +2,9 @@ import prettier from "prettier";
 import fs from "fs-extra";
 import chalk from "chalk";
 
-import { BuffType, ElementType, WeaponType } from "../genshin-mirror/modules/core/enum";
+import { BuffType, ElementType, Region, WeaponType } from "../genshin-mirror/modules/core/enum";
 import type { IAttr } from "../genshin-mirror/modules/core/interface";
-import { startCase } from "lodash";
+import { camelCase, startCase } from "lodash";
 
 export type Dict<T = string> = { [x: string]: T };
 
@@ -29,33 +29,33 @@ export const locales: Dict = {
 export const itemMap = (fs.readJsonSync(DATA_DIR + "ExcelBinOutput/MaterialExcelConfigData.json") as Item[]).reduce<{
   [x: string]: Item;
 }>((r, v) => {
-  r[v.Id] = v;
-  r[toID(v.NameTextMapHash)] = v;
+  r[v.id] = v;
+  r[toID(v.nameTextMapHash)] = v;
   return r;
 }, {});
 
 export const affixMap = (fs.readJSONSync(DATA_DIR + "ExcelBinOutput/EquipAffixExcelConfigData.json") as WeaponAffixData[]).reduce<{
   [x: number]: WeaponAffixData[];
 }>((r, v) => {
-  if (!r[v.Id]) {
-    r[v.Id] = [v];
+  if (!r[v.id]) {
+    r[v.id] = [v];
   } else {
-    r[v.Id].push(v);
+    r[v.id].push(v);
   }
   return r;
 }, {});
 
 export const tagMap = (fs.readJsonSync(DATA_DIR + "ExcelBinOutput/FeatureTagExcelConfigData.json") as FeatureTagExcelConfigData[]).reduce<{
   [x: number]: FeatureTagExcelConfigData;
-}>((r, v) => ((r[v.TagID] = v), r), {});
+}>((r, v) => ((r[v.tagID] = v), r), {});
 
 export const tagGroupMap = (fs.readJsonSync(DATA_DIR + "ExcelBinOutput/FeatureTagGroupExcelConfigData.json") as FeatureTagGroupExcelConfigData[]).reduce<{
   [x: number]: FeatureTagGroupExcelConfigData;
-}>((r, v) => ((r[v.GroupID] = v), r), {});
+}>((r, v) => ((r[v.groupID] = v), r), {});
 
 export const relicSetMap = (fs.readJsonSync(DATA_DIR + "ExcelBinOutput/ReliquarySetExcelConfigData.json") as ReliquarySetExcelConfigData[]).reduce<{
   [x: number]: ReliquarySetExcelConfigData;
-}>((r, v) => ((r[v.SetId] = v), r), {});
+}>((r, v) => ((r[v.setId] = v), r), {});
 
 export function toText(hash: number, lang = "en") {
   return locales[lang][hash];
@@ -63,8 +63,23 @@ export function toText(hash: number, lang = "en") {
 
 export function toID(hash: number, lang = "en") {
   return locales[lang][hash]
-    .split(/\s+/g)
+    ?.split(/\s+/g)
     .map(v => startCase(v))
+    .join("")
+    .replace(/\W+/g, "");
+}
+
+export function toAvatarID(hash: number, region: Region) {
+  if (region === Region.Inazuma)
+    return locales["en"][hash]
+      .split(/\s+/g)
+      .slice(-1)
+      .map(v => camelCase(v))
+      .join("")
+      .replace(/\W+/g, "");
+  return locales["en"][hash]
+    .split(/\s+/g)
+    .map(v => camelCase(v))
     .join("")
     .replace(/\W+/g, "");
 }
@@ -80,14 +95,14 @@ export function toItem(id: number | string) {
 }
 
 export function toDesc(raw: string) {
-  return raw.replace(/\\n/g, "\n");
+  return raw?.replace(/\\n/g, "\n");
 }
 
 // 生成大段文字的国际化文件
-export async function saveTranslation(domain: string, file: string, produce: (t: (hash: number) => string) => any) {
+export async function saveTranslation(domain: string, file: string, produce: (t: (hash: number) => string, lang: string) => any) {
   for (const lang in locales) {
     const t = (n: number) => toText(n, lang) || toText(n, "zh-Hant");
-    const obj = produce(t);
+    const obj = produce(t, lang);
     await saveObject(lang + "/" + domain, file, obj);
   }
 }
@@ -145,7 +160,9 @@ export function toElement(skill: string) {
 
 export function toTags(id: number) {
   const group = tagGroupMap[id];
-  return group.TagIDs.filter(Boolean).map(v => tagMap[v]);
+  return group.tagIDs.filter(Boolean)
+    .map(v => tagMap[v])
+    .filter(Boolean);
 }
 
 export function toAttrType(str: string) {
@@ -196,7 +213,7 @@ export function toAttrType(str: string) {
 }
 
 export function toAttr(src: WeaponAffixAddProp[]): IAttr[] {
-  return src.filter(v => v.Type && v.Value).map(v => ({ type: toAttrType(v.Type!), value: toNum(v.Value!) }));
+  return src.filter(v => v.type && v.value).map(v => ({ type: toAttrType(v.type!), value: toNum(v.value!) }));
 }
 
 const _BASE62_ST = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -231,66 +248,66 @@ export function debase62(src: string): number {
 }
 
 interface Item {
-  InteractionTitleTextMapHash: number;
-  NoFirstGetHint?: boolean;
-  ItemUse: ItemUse[];
-  RankLevel: number;
-  EffectDescTextMapHash: number;
-  SpecialDescTextMapHash: number;
-  TypeDescTextMapHash: number;
-  EffectIcon: string;
-  EffectName: string;
-  PicPath: any[];
-  SatiationParams: any[];
-  DestroyReturnMaterial: any[];
-  DestroyReturnMaterialCount: any[];
-  Id: number;
-  NameTextMapHash: number;
-  DescTextMapHash: number;
-  Icon: string;
-  ItemType: string;
-  Rank?: number;
-  EffectGadgetId?: number;
-  MaterialType?: string;
-  GadgetId?: number;
-  StackLimit?: number;
+  interactionTitleTextMapHash: number;
+  noFirstGetHint?: boolean;
+  itemUse: ItemUse[];
+  rankLevel: number;
+  effectDescTextMapHash: number;
+  specialDescTextMapHash: number;
+  typeDescTextMapHash: number;
+  effectIcon: string;
+  effectName: string;
+  picPath: any[];
+  satiationParams: any[];
+  destroyReturnMaterial: any[];
+  destroyReturnMaterialCount: any[];
+  id: number;
+  nameTextMapHash: number;
+  descTextMapHash: number;
+  icon: string;
+  itemType: string;
+  rank?: number;
+  effectGadgetId?: number;
+  materialType?: string;
+  gadgetId?: number;
+  stackLimit?: number;
 }
 
 interface ItemUse {
-  UseParam: string[];
+  useParam: string[];
 }
 
 interface WeaponAffixData {
-  AffixId: number;
-  Id: number;
-  NameTextMapHash: number;
-  DescTextMapHash: number;
-  OpenConfig: string;
-  AddProps: WeaponAffixAddProp[];
-  ParamList: number[];
-  Level?: number;
+  affixId: number;
+  id: number;
+  nameTextMapHash: number;
+  descTextMapHash: number;
+  openConfig: string;
+  addProps: WeaponAffixAddProp[];
+  paramList: number[];
+  level?: number;
 }
 
 interface WeaponAffixAddProp {
-  Type?: string;
-  Value?: number;
+  type?: string;
+  value?: number;
 }
 
 interface FeatureTagExcelConfigData {
-  TagID: number;
-  TagName: string;
-  TagDesp: string;
+  tagID: number;
+  tagName: string;
+  tagDesp: string;
 }
 interface FeatureTagGroupExcelConfigData {
-  GroupID: number;
-  TagIDs: number[];
+  groupID: number;
+  tagIDs: number[];
 }
 
 interface ReliquarySetExcelConfigData {
-  SetId: number;
-  SetIcon: string;
-  SetNeedNum: number[];
-  EquipAffixId: number;
-  ContainsList: number[];
-  DisableFilter?: number;
+  setId: number;
+  setIcon: string;
+  setNeedNum: number[];
+  equipAffixId: number;
+  containsList: number[];
+  disableFilter?: number;
 }

@@ -12,21 +12,21 @@ export async function run() {
 
 async function parseTeamResonance() {
   interface TeamResonanceExcelConfigData {
-    TeamResonanceId: number;
-    TeamResonanceGroupId: number;
-    Level: number;
-    FireAvatarCount?: number;
-    NameTextMapHash: number;
-    DescTextMapHash: number;
-    OpenConfig: string;
-    AddProps: any[];
-    ParamList: number[];
-    WaterAvatarCount?: number;
-    WindAvatarCount?: number;
-    ElectricAvatarCount?: number;
-    IceAvatarCount?: number;
-    RockAvatarCount?: number;
-    Cond?: string;
+    teamResonanceId: number;
+    teamResonanceGroupId: number;
+    level: number;
+    fireAvatarCount?: number;
+    nameTextMapHash: number;
+    descTextMapHash: number;
+    openConfig: string;
+    addProps: any[];
+    paramList: number[];
+    waterAvatarCount?: number;
+    windAvatarCount?: number;
+    electricAvatarCount?: number;
+    iceAvatarCount?: number;
+    rockAvatarCount?: number;
+    cond?: string;
   }
 
   interface ItemUse {
@@ -37,11 +37,11 @@ async function parseTeamResonance() {
   await saveTranslation("misc", "resonance.json", t => {
     const rst = data.map(v => {
       const item = {
-        id: toID(v.NameTextMapHash),
-        name: toText(v.NameTextMapHash),
-        localeName: t(v.NameTextMapHash),
-        desc: toDesc(t(v.DescTextMapHash)),
-        param: v.ParamList.map(toNum),
+        id: toID(v.nameTextMapHash),
+        name: toText(v.nameTextMapHash),
+        localeName: t(v.nameTextMapHash),
+        desc: toDesc(t(v.descTextMapHash)),
+        param: v.paramList?.map(toNum),
       };
       return item;
     });

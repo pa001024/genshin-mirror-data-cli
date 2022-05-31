@@ -2,7 +2,6 @@ import axios from "axios";
 import consola from "consola";
 import fs from "fs-extra";
 import { snakeCase } from "lodash";
-import { MaterialType } from "../../genshin-mirror/modules/core/enum";
 
 // extra
 import { DATA_DIR, toID, toText } from "../util";
@@ -15,29 +14,29 @@ export async function run() {
 
 async function parseMaterial() {
   interface MaterialExcelConfigData {
-    interactionTitleTextMapHash: number;
-    noFirstGetHint?: boolean;
-    itemUse: ItemUse[];
-    rankLevel: number;
-    effectDescTextMapHash: number;
-    specialDescTextMapHash: number;
-    typeDescTextMapHash: number;
-    effectIcon: string;
-    effectName: string;
-    picPath: any[];
-    satiationParams: any[];
-    destroyReturnMaterial: any[];
-    destroyReturnMaterialCount: any[];
-    id: number;
-    nameTextMapHash: number;
-    descTextMapHash: number;
-    icon: string;
-    itemType: string;
-    rank?: number;
-    effectGadgetId?: number;
-    materialType?: string;
-    gadgetId?: number;
-    stackLimit?: number;
+    InteractionTitleTextMapHash: number;
+    NoFirstGetHint?: boolean;
+    ItemUse: ItemUse[];
+    RankLevel: number;
+    EffectDescTextMapHash: number;
+    SpecialDescTextMapHash: number;
+    TypeDescTextMapHash: number;
+    EffectIcon: string;
+    EffectName: string;
+    PicPath: any[];
+    SatiationParams: any[];
+    DestroyReturnMaterial: any[];
+    DestroyReturnMaterialCount: any[];
+    Id: number;
+    NameTextMapHash: number;
+    DescTextMapHash: number;
+    Icon: string;
+    ItemType: string;
+    Rank?: number;
+    EffectGadgetId?: number;
+    MaterialType?: string;
+    GadgetId?: number;
+    StackLimit?: number;
   }
 
   interface ItemUse {
@@ -52,11 +51,7 @@ async function parseMaterial() {
       id = id.replace("ShardOfAFoulLegacy", "ShardOfFoulLegacy");
       id = id.replace("ScatteredPieceOfDecarabiansDream", "ScatteredPieceOfDecarabianssDream");
       return [
-        `https://genshin.honeyhunterworld.com/img/upgrade/material/${snakeCase(id)}_70.png`,
-        `https://genshin.honeyhunterworld.com/img/upgrade/gem/${snakeCase(id)}_70.png`,
-        `https://genshin.honeyhunterworld.com/img/upgrade/guide/${snakeCase(id)}_70.png`,
-        `https://genshin.honeyhunterworld.com/img/upgrade/weapon/${snakeCase(id)}_70.png`,
-        `https://genshin.honeyhunterworld.com/img/event/${snakeCase(id)}_70.png`,
+        `https://genshin.honeyhunterworld.com/img/char/${snakeCase(id)}_face.png`,
       ];
     },
     [MaterialType.MATERIAL_FOOD]: (id: string) => {
@@ -103,10 +98,10 @@ async function parseMaterial() {
   };
 
   const items = data.filter(v => {
-    if (v.id === 110000) return false;
-    if (v.materialType && MaterialType[v.materialType as any] in enabled) {
-      const cnName = toText(v.nameTextMapHash, "zh-Hans");
-      const cnType = toText(v.typeDescTextMapHash, "zh-Hans");
+    if (v.Id === 110000) return false;
+    if (v.MaterialType && MaterialType[v.MaterialType as any] in enabled) {
+      const cnName = toText(v.NameTextMapHash, "zh-Hans");
+      const cnType = toText(v.TypeDescTextMapHash, "zh-Hans");
       if (!cnType || cnName.includes("（废弃）") || cnName.includes("(test)") || cnName.includes("（test）")) return false;
       return true;
     }
@@ -117,12 +112,12 @@ async function parseMaterial() {
   const TH = 4;
   for (let i = 0; i < items.length; i += TH) {
     const job = async (item: MaterialExcelConfigData) => {
-      const id = toID(item.nameTextMapHash);
+      const id = toID(item.NameTextMapHash);
       const fn = `tmp/item/${id}.png`;
       // skip existed files
       if (await fs.pathExists(fn)) return;
 
-      const urls = enabled[MaterialType[item.materialType as any]];
+      const urls = enabled[MaterialType[item.MaterialType as any]];
       let noitem = true;
       for (const url of urls(id)) {
         const isOK = await axios.head(url).catch(() => {});

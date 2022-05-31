@@ -13,41 +13,41 @@ export async function run() {
 
 async function parseEnemy() {
   interface MonsterExcelConfigData {
-    MonsterName: string;
-    Type: string;
+    monsterName: string;
+    type: string;
     // ScriptDataPathHashPre: number;
     // ScriptDataPathHashSuffix: number;
-    ServerScript: string;
+    serverScript: string;
     // CombatConfigHashPre: number;
     // CombatConfigHashSuffix: number;
-    Affix: any[];
-    AI: string;
-    IsAIHashCheck: boolean;
-    Equips: number[];
-    HpDrops: HpDrop[];
-    KillDropId: number;
-    ExcludeWeathers: string;
-    FeatureTagGroupId: number;
-    MpPropId: number;
-    Skin: string;
-    DescribeId: number;
-    CombatBGMLevel: number;
-    HpBase: number;
-    AttackBase: number;
-    DefenseBase: number;
-    FireSubHurt: number;
-    GrassSubHurt: number;
-    WaterSubHurt: number;
-    ElecSubHurt: number;
-    WindSubHurt: number;
-    IceSubHurt: number;
-    RockSubHurt: number;
-    PropGrowCurves: PropGrowCurve[];
-    PhysicalSubHurt: number;
+    affix: any[];
+    aI: string;
+    isAIHashCheck: boolean;
+    equips: number[];
+    hpDrops: HpDrop[];
+    killDropId: number;
+    excludeWeathers: string;
+    featureTagGroupId: number;
+    mpPropId: number;
+    skin: string;
+    describeId: number;
+    combatBGMLevel: number;
+    hpBase: number;
+    attackBase: number;
+    defenseBase: number;
+    fireSubHurt: number;
+    grassSubHurt: number;
+    waterSubHurt: number;
+    elecSubHurt: number;
+    windSubHurt: number;
+    iceSubHurt: number;
+    rockSubHurt: number;
+    propGrowCurves: PropGrowCurve[];
+    physicalSubHurt: number;
     // PrefabPathRagdollHashPre: number;
     // PrefabPathRagdollHashSuffix: number;
-    Id: number;
-    NameTextMapHash: number;
+    id: number;
+    nameTextMapHash: number;
     // PrefabPathHashPre: number;
     // PrefabPathHashSuffix: number;
     // PrefabPathRemoteHashPre: number;
@@ -56,62 +56,63 @@ async function parseEnemy() {
     // ControllerPathHashSuffix: number;
     // ControllerPathRemoteHashPre: number;
     // ControllerPathRemoteHashSuffix: number;
-    CampId: number;
-    LODPatternName: string;
+    campId: number;
+    lODPatternName: string;
   }
   interface PropGrowCurve {
-    Type: string;
-    GrowCurve: string;
+    type: string;
+    growCurve: string;
   }
   interface HpDrop {
-    DropId?: number;
-    HpPercent?: number;
+    dropId?: number;
+    hpPercent?: number;
   }
   interface MonsterDescribeExcelConfigData {
-    Id: number;
-    NameTextMapHash: number;
-    TitleId: number;
-    SpecialNameLabId: number;
-    Icon: string;
-    DescTextMapHash: number;
-    LockDescTextMapHash: number;
+    id: number;
+    nameTextMapHash: number;
+    titleId: number;
+    specialNameLabId: number;
+    icon: string;
+    descTextMapHash: number;
+    lockDescTextMapHash: number;
   }
   interface MonsterRelationshipExcelConfigData {
-    Id: number;
-    TagStr: string;
-    MonsterRarity: string;
+    id: number;
+    tagStr: string;
+    monsterRarity: string;
   }
   const data: MonsterExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/MonsterExcelConfigData.json");
   const relData: MonsterRelationshipExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/MonsterRelationshipExcelConfigData.json");
-  const relIndex = new Map(relData.map(v => [v.Id, v]));
+  const relIndex = new Map(relData.map(v => [v.id, v]));
   const descData: MonsterDescribeExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/MonsterDescribeExcelConfigData.json");
-  const descIndex = new Map(descData.map(v => [v.Id, v]));
+  const descIndex = new Map(descData.map(v => [v.id, v]));
 
   await saveTranslation("enemy", "enemy.json", t => {
     const rst = data
-      .filter(v => descIndex.has(v.DescribeId))
+      .filter(v => descIndex.has(v.describeId))
       .map(v => {
-        const desc = descIndex.get(v.DescribeId)!;
-        const rel = relIndex.get(v.DescribeId);
+        const desc = descIndex.get(v.describeId)!;
+        const rel = relIndex.get(v.describeId);
         return {
-          id: toID(desc.NameTextMapHash),
-          name: toText(desc.NameTextMapHash),
-          localeName: t(desc.NameTextMapHash),
-          desc: toDesc(t(desc.DescTextMapHash)),
-          baseHP: toNum(v.HpBase || 0),
-          baseATK: toNum(v.AttackBase || 0),
-          baseDEF: toNum(v.DefenseBase || 0), // 固定500
-          type: MonsterRarity[rel?.MonsterRarity as any],
+          uid: v.id,
+          id: toID(desc.nameTextMapHash),
+          name: toText(desc.nameTextMapHash),
+          localeName: t(desc.nameTextMapHash),
+          desc: toDesc(t(desc.descTextMapHash)),
+          baseHP: toNum(v.hpBase || 0),
+          baseATK: toNum(v.attackBase || 0),
+          baseDEF: toNum(v.defenseBase || 0), // 固定500
+          type: MonsterRarity[rel?.monsterRarity as any],
           resist: [
             //
-            toNum(v.FireSubHurt || 0),
-            toNum(v.GrassSubHurt || 0),
-            toNum(v.WaterSubHurt || 0),
-            toNum(v.ElecSubHurt || 0),
-            toNum(v.WindSubHurt || 0),
-            toNum(v.IceSubHurt || 0),
-            toNum(v.RockSubHurt || 0),
-            toNum(v.PhysicalSubHurt || 0),
+            toNum(v.fireSubHurt || 0),
+            toNum(v.grassSubHurt || 0),
+            toNum(v.waterSubHurt || 0),
+            toNum(v.elecSubHurt || 0),
+            toNum(v.windSubHurt || 0),
+            toNum(v.iceSubHurt || 0),
+            toNum(v.rockSubHurt || 0),
+            toNum(v.physicalSubHurt || 0),
           ],
         };
       });

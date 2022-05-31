@@ -16,85 +16,85 @@ async function parseDungeon() {
     [key: number]: number;
   }
   interface EnterCostItem {
-    Id: number;
+    id: number;
   }
   interface DungeonExcelConfigData {
-    Id: number;
-    NameTextMapHash: any;
-    DisplayNameTextMapHash: any;
-    DescTextMapHash: any;
-    Type: string;
-    SceneId: number;
-    InvolveType: string;
-    ShowLevel: number;
-    LimitLevel: number;
-    LevelRevise: number;
-    PassCond: number;
-    ReviveMaxCount: number;
-    DayEnterCount: number;
-    EnterCostItems: EnterCostItem[];
-    PassRewardPreviewID: number;
-    SettleCountdownTime: number;
-    SettleShows: string[];
-    SettleUIType: string;
-    RecommendElementTypes: string[];
-    LevelConfigMap: LevelConfigMap;
-    CityID: number;
-    EntryPicPath: string;
-    StateType: "DUNGEON_STATE_RELEASE" | "DUNGEON_STATE_TEST";
-    AvatarLimitType?: number;
-    IsDynamicLevel?: boolean;
-    ForbiddenRestart?: boolean;
-    SerialId?: number;
-    PassJumpDungeon?: number;
-    DontShowPushTips?: boolean;
-    PlayType: string;
-    EventInterval?: number;
-    FirstPassRewardPreviewID?: number;
-    StatueCostID?: number;
-    StatueCostCount?: number;
-    StatueDrop?: number;
-    ReviveIntervalTime?: number;
+    id: number;
+    nameTextMapHash: any;
+    displayNameTextMapHash: any;
+    descTextMapHash: any;
+    type: string;
+    sceneId: number;
+    involveType: string;
+    showLevel: number;
+    limitLevel: number;
+    levelRevise: number;
+    passCond: number;
+    reviveMaxCount: number;
+    dayEnterCount: number;
+    enterCostItems: EnterCostItem[];
+    passRewardPreviewID: number;
+    settleCountdownTime: number;
+    settleShows: string[];
+    settleUIType: string;
+    recommendElementTypes: string[];
+    levelConfigMap: LevelConfigMap;
+    cityID: number;
+    entryPicPath: string;
+    stateType: "DUNGEON_STATE_RELEASE" | "DUNGEON_STATE_TEST";
+    avatarLimitType?: number;
+    isDynamicLevel?: boolean;
+    forbiddenRestart?: boolean;
+    serialId?: number;
+    passJumpDungeon?: number;
+    dontShowPushTips?: boolean;
+    playType: string;
+    eventInterval?: number;
+    firstPassRewardPreviewID?: number;
+    statueCostID?: number;
+    statueCostCount?: number;
+    statueDrop?: number;
+    reviveIntervalTime?: number;
   }
   interface SatisfiedCond {
-    Type: string;
-    Param1: number;
+    type: string;
+    param1: number;
   }
 
   interface DungeonEntryExcelConfigData {
-    Id: number;
-    DungeonEntryId: number;
-    Type: string;
-    DescTextMapHash: any;
-    CooldownTipsDungeonId: number[];
-    CondComb: string;
-    SatisfiedCond: SatisfiedCond[];
-    PicPath: string;
-    SystemOpenUiId: number;
-    RewardDataId: number;
-    DescriptionCycleRewardList: number[][];
-    IsDailyRefresh?: boolean;
-    IsDefaultOpen?: boolean;
+    id: number;
+    dungeonEntryId: number;
+    type: string;
+    descTextMapHash: any;
+    cooldownTipsDungeonId: number[];
+    condComb: string;
+    satisfiedCond: SatisfiedCond[];
+    picPath: string;
+    systemOpenUiId: number;
+    rewardDataId: number;
+    descriptionCycleRewardList: number[][];
+    isDailyRefresh?: boolean;
+    isDefaultOpen?: boolean;
   }
 
   const data: DungeonExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/DungeonExcelConfigData.json");
   const entryData: DungeonEntryExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/DungeonEntryExcelConfigData.json");
-  const entryIndex = new Map(entryData.map(v => [v.Id, v]));
+  const entryIndex = new Map(entryData.map(v => [v.id, v]));
 
   await saveTranslation("dungeon", "dungeon.json", t => {
     const rst = data
       .filter(v => {
-        const cnName = toText(v.NameTextMapHash, "zh-Hans");
+        const cnName = toText(v.nameTextMapHash, "zh-Hans");
         return !cnName.includes("(test)");
       })
       .map(v => {
         return {
-          id: v.Id,
-          name: toText(v.NameTextMapHash),
-          localeName: t(v.NameTextMapHash),
-          desc: toDesc(t(v.DescTextMapHash)),
-          elements: v.RecommendElementTypes.map(toElement).filter(Boolean),
-          type: DungeonType[v.Type as any],
+          id: v.id,
+          name: toText(v.nameTextMapHash),
+          localeName: t(v.nameTextMapHash),
+          desc: toDesc(t(v.descTextMapHash)),
+          elements: v.recommendElementTypes.map(toElement).filter(Boolean),
+          type: DungeonType[v.type as any],
         };
       });
 

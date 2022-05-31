@@ -15,18 +15,19 @@ program
   .description("处理")
   .option("-o, --output", "输出到content目录")
   .option("--icon", "处理icon")
-  .option("-a, --avatar", "处理char")
-  .option("-c, --curve", "处理curve")
-  .option("-w, --weapon", "处理weapon")
-  .option("-i, --item", "处理item")
-  .option("-I, --itemimg", "处理itemimg")
-  .option("-e, --enemy", "处理enemy")
-  .option("-m, --misc", "处理misc")
-  .option("-r, --relic", "处理relic")
-  .option("-R, --relicimg", "处理relicimg")
-  .option("-S, --skillimg", "处理skillimg")
-  .option("-d, --dungeon", "处理dungeon")
-  .option("-l, --locale", "处理i18n locales")
+  .option("-a, --avatar", "处理char (角色)")
+  .option("-c, --curve", "处理curve (成长曲线)")
+  .option("-w, --weapon", "处理weapon (武器)")
+  .option("-W, --weaponimg", "处理weaponimg (武器图片)")
+  .option("-i, --item", "处理item (物品)")
+  .option("-I, --itemimg", "处理itemimg (物品图片)")
+  .option("-e, --enemy", "处理enemy (敌人)")
+  .option("-m, --misc", "处理misc (杂项)")
+  .option("-r, --relic", "处理relic (圣遗物)")
+  .option("-R, --relicimg", "处理relicimg (圣遗物图片)")
+  .option("-S, --skillimg", "处理skillimg (技能图片)")
+  .option("-d, --dungeon", "处理dungeon (副本)")
+  .option("-l, --locale", "处理i18n locales (国际化)")
   .action(async args => {
     // 输出前清理
     if (args.output) {
@@ -78,6 +79,10 @@ program
     if (args.skillimg) {
       console.log(`${chalk.green("[CLI]")} processing skillimg...`);
       await runCommand("skillimg");
+    }
+    if (args.weaponimg) {
+      console.log(`${chalk.green("[CLI]")} processing weaponimg...`);
+      await runCommand("weaponimg");
     }
     if (args.dungeon) {
       console.log(`${chalk.green("[CLI]")} processing dungeon...`);

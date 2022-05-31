@@ -20,13 +20,13 @@ export async function run() {
 async function parseMonsterLevel() {
   const data: MonsterCurveExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/MonsterCurveExcelConfigData.json");
 
-  const cols = data[0].CurveInfos.map(v => v.Type);
+  const cols = data[0].curveInfos.map(v => v.type);
 
   await saveObject(
     "curve",
     "enemy.json",
     cols.reduce<Dict<number[]>>((r, v, i) => {
-      r[v] = data.map(v => toNum(v.CurveInfos[i].Value! || 0));
+      r[v] = data.map(v => toNum(v.curveInfos[i].value! || 0));
       return r;
     }, {})
   );
@@ -38,8 +38,8 @@ async function parsePlayerLevel() {
     "curve",
     "playerLevel.json",
     data.map(v => {
-      const rst: any = { lv: v.Level, exp: v.Exp };
-      const unlock = toText(v.UnlockDescTextMapHash);
+      const rst: any = { lv: v.level, exp: v.exp };
+      const unlock = toText(v.unlockDescTextMapHash);
       if (unlock) rst.unlock = unlock;
       return rst;
     })
@@ -52,11 +52,11 @@ async function parseWeapon() {
   const rst: WeaponCurveResultData = {};
 
   for (const level of data) {
-    level.CurveInfos.map(v => {
-      if (!rst[v.Type]) {
-        rst[v.Type] = [toNum(v.Value)];
+    level.curveInfos.map(v => {
+      if (!rst[v.type]) {
+        rst[v.type] = [toNum(v.value)];
       } else {
-        rst[v.Type].push(toNum(v.Value));
+        rst[v.type].push(toNum(v.value));
       }
     });
   }
@@ -107,9 +107,9 @@ async function parseCoeff() {
   const data: ElementCoeffExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/ElementCoeffExcelConfigData.json");
 
   const rst = {
-    crash: data.filter(v => v.Level).map(v => toNum(v.CrashCo)),
-    element: data.filter(v => v.Level).map(v => toNum(v.ElementLevelCo)),
-    shield: data.filter(v => v.Level).map(v => toNum(v.PlayerShieldLevelCo)),
+    crash: data.filter(v => v.level).map(v => toNum(v.crashCo)),
+    element: data.filter(v => v.level).map(v => toNum(v.elementLevelCo)),
+    shield: data.filter(v => v.level).map(v => toNum(v.playerShieldLevelCo)),
   };
 
   await saveObject("curve", "coeff.json", rst);
@@ -119,17 +119,17 @@ async function parseMainattr() {
   const data: ReliquaryLevelExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/ReliquaryLevelExcelConfigData.json");
   const dropData: ReliquaryMainPropExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/ReliquaryMainPropExcelConfigData.json");
 
-  const normalData = data.filter(v => v.Rank);
+  const normalData = data.filter(v => v.rank);
 
-  const groups = groupBy(normalData, v => v.Rank);
-  const typenames = groups[5][0].AddProps.map(v => BuffType[toAttrType(v.PropType)]);
+  const groups = groupBy(normalData, v => v.rank);
+  const typenames = groups[5][0].addProps.map(v => BuffType[toAttrType(v.propType)]);
 
   const rst = map(groups, (group, rank) => {
     const maxLevel = toMaxLevel(~~rank);
     const normalGroup = group
-      .filter(v => v.Level <= maxLevel)
+      .filter(v => v.level <= maxLevel)
       .map(v => {
-        return v.AddProps.map(v => toNum(v.Value));
+        return v.addProps.map(v => toNum(v.value));
       });
 
     return normalGroup;
@@ -154,12 +154,12 @@ async function parseMainattr() {
 
   function toWeight(depotId: number) {
     const weightMap = keyBy(
-      dropData.filter(v => v.PropDepotId === depotId),
-      v => BuffType[toAttrType(v.PropType)]
+      dropData.filter(v => v.propDepotId === depotId),
+      v => BuffType[toAttrType(v.propType)]
     );
     const rst = typenames.reduce<Dict<number>>((r, v) => {
-      if (!weightMap[v]?.Weight) return r;
-      r[v] = weightMap[v].Weight;
+      if (!weightMap[v]?.weight) return r;
+      r[v] = weightMap[v].weight;
       return r;
     }, {});
     return rst;
@@ -200,31 +200,31 @@ function toMaxLevel(rank: number) {
 }
 
 interface ReliquaryLevelExcelConfigData {
-  Level: number;
-  AddProps: AddProp[];
-  Rank?: number;
-  Exp?: number;
+  level: number;
+  addProps: AddProp[];
+  rank?: number;
+  exp?: number;
 }
 
 interface AddProp {
-  PropType: string;
-  Value: number;
+  propType: string;
+  value: number;
 }
 
 interface ReliquaryMainPropExcelConfigData {
-  Id: number;
-  PropDepotId: number;
-  PropType: string;
-  AffixName: string;
-  Weight: number;
+  id: number;
+  propDepotId: number;
+  propType: string;
+  affixName: string;
+  weight: number;
 }
 
 interface ElementCoeffExcelConfigData {
-  Level: number;
-  CrashCo: number;
-  ElementLevelCo: number;
-  PlayerElementLevelCo: number;
-  PlayerShieldLevelCo: number;
+  level: number;
+  crashCo: number;
+  elementLevelCo: number;
+  playerElementLevelCo: number;
+  playerShieldLevelCo: number;
 }
 
 interface WeaponCurveResultData {
@@ -232,29 +232,29 @@ interface WeaponCurveResultData {
 }
 
 interface WeaponCurveExcelConfigData {
-  Level: number;
-  CurveInfos: WeaponCurveInfo[];
+  level: number;
+  curveInfos: WeaponCurveInfo[];
 }
 
 interface WeaponCurveInfo {
-  Type: string;
-  Arith: string;
-  Value: number;
+  type: string;
+  arith: string;
+  value: number;
 }
 
 interface PlayerLevelExcelConfigData {
-  Level: number;
-  Exp: number;
-  UnlockDescTextMapHash: number;
+  level: number;
+  exp: number;
+  unlockDescTextMapHash: number;
 }
 
 interface MonsterCurveExcelConfigData {
-  Level: number;
-  CurveInfos: CurveInfo[];
+  level: number;
+  curveInfos: CurveInfo[];
 }
 
 interface CurveInfo {
-  Type: string;
-  Arith: string;
-  Value?: number;
+  type: string;
+  arith: string;
+  value?: number;
 }

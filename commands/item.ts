@@ -14,43 +14,43 @@ export async function run() {
 
 async function parseMaterial() {
   interface MaterialExcelConfigData {
-    InteractionTitleTextMapHash: number;
-    NoFirstGetHint?: boolean;
-    ItemUse: ItemUse[];
-    RankLevel: number;
-    EffectDescTextMapHash: number;
-    SpecialDescTextMapHash: number;
-    TypeDescTextMapHash: number;
-    EffectIcon: string;
-    EffectName: string;
-    PicPath: any[];
-    SatiationParams: any[];
-    DestroyReturnMaterial: any[];
-    DestroyReturnMaterialCount: any[];
-    Id: number;
-    NameTextMapHash: number;
-    DescTextMapHash: number;
-    Icon: string;
-    ItemType: string;
-    Rank?: number;
-    EffectGadgetId?: number;
-    MaterialType?: string;
-    GadgetId?: number;
-    StackLimit?: number;
+    interactionTitleTextMapHash: number;
+    noFirstGetHint?: boolean;
+    itemUse: ItemUse[];
+    rankLevel: number;
+    effectDescTextMapHash: number;
+    specialDescTextMapHash: number;
+    typeDescTextMapHash: number;
+    effectIcon: string;
+    effectName: string;
+    picPath: any[];
+    satiationParams: any[];
+    destroyReturnMaterial: any[];
+    destroyReturnMaterialCount: any[];
+    id: number;
+    nameTextMapHash: number;
+    descTextMapHash: number;
+    icon: string;
+    itemType: string;
+    rank?: number;
+    effectGadgetId?: number;
+    materialType?: string;
+    gadgetId?: number;
+    stackLimit?: number;
   }
 
   interface Jump {}
 
   interface MaterialSourceDataExcelConfigData {
-    Id: number;
-    Name: string;
-    Dungeon: number[];
-    Jump: Jump[];
-    TextList: number[];
+    id: number;
+    name: string;
+    dungeon: number[];
+    jump: Jump[];
+    textList: number[];
   }
 
   interface ItemUse {
-    UseParam: string[];
+    useParam: string[];
   }
   const data: MaterialExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/MaterialExcelConfigData.json");
   const srcData: MaterialSourceDataExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/MaterialSourceDataExcelConfigData.json");
@@ -59,27 +59,28 @@ async function parseMaterial() {
   await saveTranslation("item", "item.json", t => {
     const rst = data
       .filter(v => {
-        if (v.Id === 110000) return false;
-        if (v.MaterialType && v.MaterialType in MaterialType) {
-          const cnName = toText(v.NameTextMapHash, "zh-Hans");
-          const cnType = toText(v.TypeDescTextMapHash, "zh-Hans");
+        if (v.id === 110000) return false;
+        if (v.materialType && v.materialType in MaterialType) {
+          const cnName = toText(v.nameTextMapHash, "zh-Hans");
+          const cnType = toText(v.typeDescTextMapHash, "zh-Hans");
           if (!cnType || cnName.includes("（废弃）") || cnName.includes("(test)") || cnName.includes("（test）")) return false;
           return true;
         }
         return false;
       })
       .map(v => {
-        const src = srcMap[v.Id];
-        const drop = src.TextList.map(t).filter(Boolean);
+        const src = srcMap[v.id];
+        const drop = src?.textList.map(t).filter(Boolean);
         const item: IItem = {
-          id: toID(v.NameTextMapHash),
-          name: toText(v.NameTextMapHash),
-          localeName: t(v.NameTextMapHash),
-          desc: toDesc(t(v.DescTextMapHash)),
-          rarity: v.RankLevel || 1,
-          type: (MaterialType[v.MaterialType as any] as any) as MaterialType,
-          typeText: t(v.TypeDescTextMapHash),
-          drop: drop.length ? drop : undefined,
+          uid: v.id,
+          id: toID(v.nameTextMapHash),
+          name: toText(v.nameTextMapHash),
+          localeName: t(v.nameTextMapHash),
+          desc: toDesc(t(v.descTextMapHash)),
+          rarity: v.rankLevel || 1,
+          type: MaterialType[v.materialType as any] as any as MaterialType,
+          typeText: t(v.typeDescTextMapHash),
+          drop: drop && drop.length ? drop : undefined,
         };
         return item;
       });

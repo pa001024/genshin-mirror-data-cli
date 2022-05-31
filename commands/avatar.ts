@@ -1,10 +1,11 @@
 import fs from "fs-extra";
 import { findLastIndex, uniqWith } from "lodash";
-import { BodyType, BuffType, Region } from "../../genshin-mirror/modules/core/enum";
+import * as xlsx from "xlsx";
+import { BodyType, BuffType, Region, WeaponType } from "../../genshin-mirror/modules/core/enum";
 import type { IAvatar, ISkill, IAscension, IConstellation, IAscensionPhase, ITalent, IItemStack, IItem } from "../../genshin-mirror/modules/core/interface";
 
 // extra
-import { DATA_DIR, Dict, saveTranslation, toNum, toText, toWeaponType, toTags, toElement, toItem, toID, toAttrType, toDesc } from "../util";
+import { DATA_DIR, Dict, saveTranslation, toNum, toText, toWeaponType, toTags, toElement, toItem, toID, toAttrType, toDesc, toAvatarID } from "../util";
 
 export async function run() {
   // await fs.emptyDir("dist/char");
@@ -15,46 +16,51 @@ export async function run() {
 async function parseChar() {
   const data: AvatarExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/AvatarExcelConfigData.json");
   const skillData: AvatarSkillExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/AvatarSkillExcelConfigData.json");
-  const skillIndex = new Map(skillData.map(v => [v.Id, v]));
+  const skillIndex = new Map(skillData.map(v => [v.id, v]));
   const depotData: AvatarSkillDepotExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/AvatarSkillDepotExcelConfigData.json");
-  const depotIndex = new Map(depotData.map(v => [v.Id, v]));
+  const depotIndex = new Map(depotData.map(v => [v.id, v]));
   const talentData: AvatarTalentExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/AvatarTalentExcelConfigData.json");
-  const talentIndex = new Map(talentData.map(v => [v.TalentId, v]));
+  const talentIndex = new Map(talentData.map(v => [v.talentId, v]));
   const proudSkillData: ProudSkillExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/ProudSkillExcelConfigData.json");
   const proudSkillIndex = proudSkillData.reduce<Dict<ProudSkillExcelConfigData[]>>((r, v) => {
-    if (v.ProudSkillGroupId in r) r[v.ProudSkillGroupId].push(v);
-    else r[v.ProudSkillGroupId] = [v];
+    if (v.proudSkillGroupId in r) r[v.proudSkillGroupId].push(v);
+    else r[v.proudSkillGroupId] = [v];
     return r;
   }, {});
   const promoteData: AvatarPromoteExcelConfigData[] = await fs.readJSON(DATA_DIR + "ExcelBinOutput/AvatarPromoteExcelConfigData.json");
   const promoteIndex = promoteData.reduce<Dict<AvatarPromoteExcelConfigData[]>>((r, v) => {
-    if (v.AvatarPromoteId in r) r[v.AvatarPromoteId].push(v);
-    else r[v.AvatarPromoteId] = [v];
+    if (v.avatarPromoteId in r) r[v.avatarPromoteId].push(v);
+    else r[v.avatarPromoteId] = [v];
     return r;
   }, {});
 
-  const normalAvatars = data.filter(v => v.UseType === "AVATAR_FORMAL");
+  const normalAvatars = data.filter(v => v.useType === "AVATAR_FORMAL");
+
+  const charList: IAvatar[] = [];
 
   for (const char of normalAvatars) {
-    const id = toText(char.NameTextMapHash).replace(/ /g, "");
-    if (id.includes("(Test)") || char.UseType === "AVATAR_ABANDON" || char.UseType === "AVATAR_SYNC_TEST") continue;
-    await saveTranslation("char", id + ".json", t => {
-      const tags = toTags(char.FeatureTagGroupID);
-      const skills = toSkills(char.SkillDepotId);
-      const ascensions = toAscension(char.AvatarPromoteId);
+    const tags = toTags(char.featureTagGroupID);
+    const region = toRegion(char, tags);
+    const id = toAvatarID(char.nameTextMapHash, region);
+
+    if (id.includes("(Test)") || char.useType === "AVATAR_ABANDON" || char.useType === "AVATAR_SYNC_TEST") continue;
+    await saveTranslation("char", id + ".json", (t, lang) => {
+      const skills = toSkills(char.skillDepotId);
+      const ascensions = toAscension(char.avatarPromoteId);
       const ascensionType = ascensions ? ascensions[0].attrs[3].type : 0;
       const avatar: IAvatar = {
-        id: toID(char.NameTextMapHash),
-        name: toText(char.NameTextMapHash),
-        localeName: t(char.NameTextMapHash),
-        desc: toDesc(t(char.DescTextMapHash)),
-        baseHP: toNum(char.HpBase || 0),
-        baseATK: toNum(char.AttackBase || 0),
-        baseDEF: toNum(char.DefenseBase || 0),
-        bodyType: toBodyType(char.BodyType),
-        rarity: toRarity(char.QualityType),
-        weapon: toWeaponType(char.WeaponType),
-        region: toRegion(char, tags),
+        uid: char.id,
+        id,
+        name: toText(char.nameTextMapHash),
+        localeName: t(char.nameTextMapHash),
+        desc: toDesc(t(char.descTextMapHash)),
+        baseHP: toNum(char.hpBase || 0),
+        baseATK: toNum(char.attackBase || 0),
+        baseDEF: toNum(char.defenseBase || 0),
+        bodyType: toBodyType(char.bodyType),
+        rarity: toRarity(char.qualityType),
+        weapon: toWeaponType(char.weaponType),
+        region,
         ascensions: ascensions.map(v => {
           const p: IAscensionPhase = {
             level: v.level,
@@ -79,31 +85,33 @@ async function parseChar() {
           [
             ...avatar.ascensions[5].itemCost
               .map(v => toItem(v.id))
-              .map(item => ({ id: toID(item.NameTextMapHash), localeName: t(item.NameTextMapHash), rarity: item.RankLevel })),
+              .map(item => ({ id: toID(item.nameTextMapHash), localeName: t(item.nameTextMapHash), rarity: item.rankLevel })),
             ...skills.items,
           ],
           (a, b) => a.id === b.id
         );
       }
+      // 全列表
+      if (lang === "zh-Hans") charList.push(avatar);
       return avatar;
 
       function toAscension(aid: number) {
         const promote = promoteIndex[aid];
         return promote
-          .filter(v => v.PromoteLevel)
+          .filter(v => v.promoteLevel)
           .map(v => {
             const rst: IAscension = {
-              level: v.PromoteLevel || 0,
-              itemCost: v.CostItems.filter(v => v.Id).map(it => {
-                const item = toItem(it.Id!);
+              level: v.promoteLevel || 0,
+              itemCost: v.costItems.filter(v => v.id).map(it => {
+                const item = toItem(it.id!);
                 if (!item) {
                   // console.warn(`[item] ${id}:${it.Id} not found`);
-                  return { id: "unknown", localeName: "???", count: it.Count! };
+                  return { id: "unknown", localeName: "???", count: it.count! };
                 }
-                return { id: toID(item.NameTextMapHash), localeName: t(item.NameTextMapHash), rarity: item.RankLevel, count: it.Count! };
+                return { id: toID(item.nameTextMapHash), localeName: t(item.nameTextMapHash), rarity: item.rankLevel, count: it.count! };
               }),
-              attrs: v.AddProps.filter(p => p.PropType).map(p => {
-                return { type: toAttrType(p.PropType!), value: p.Value ? toNum(p.Value) : 0 };
+              attrs: v.addProps.filter(p => p.propType).map(p => {
+                return { type: toAttrType(p.propType!), value: p.value ? toNum(p.value) : 0 };
               }),
             };
             return rst;
@@ -112,101 +120,88 @@ async function parseChar() {
 
       function toSkills(depotId: number) {
         const depot = depotIndex.get(depotId)!;
-        const [aSkill, eSkill] = depot.Skills.filter(Boolean).map(toSkill);
+        const [aSkill, eSkill] = depot.skills.filter(Boolean).map(toSkill);
         // const [aimPress,aim,weaponCD,teamCD]=depot.SubSkills.filter(Boolean).map(toSkill)
         // attackMode: depot.AttackModeSkill && toSkill(depot.AttackModeSkill),
 
-        const elem = skillIndex.get(depot.EnergySkill)!;
+        const elem = skillIndex.get(depot.energySkill)!;
         if (!elem) {
           // console.warn(`[skill] no elem of ${id}(${depotId}):${depot.EnergySkill}`);
         }
         return {
           aSkill, // 普攻
           eSkill, // E技能
-          qSkill: depot.EnergySkill ? toSkill(depot.EnergySkill) : undefined,
-          c13ns: depot.Talents.filter(Boolean).map(toC13n),
-          element: elem ? toElement(elem.CostElemType!) : 0, // 元素
-          talents: depot.InherentProudSkillOpens.filter(v => v.ProudSkillGroupId).map(v => toTalent(v.ProudSkillGroupId!, v.NeedAvatarPromoteLevel)),
-          items: toSkillItems(depot.Skills.filter(Boolean)[0]),
+          qSkill: depot.energySkill ? toSkill(depot.energySkill) : undefined,
+          c13ns: depot.talents.filter(Boolean).map(toC13n),
+          element: elem ? toElement(elem.costElemType!) : 0, // 元素
+          talents: depot.inherentProudSkillOpens.filter(v => v.proudSkillGroupId).map(v => toTalent(v.proudSkillGroupId!, v.needAvatarPromoteLevel)),
+          items: toSkillItems(depot.skills.filter(Boolean)[0]),
         };
       }
 
       function toC13n(talentId: number) {
         const talent = talentIndex.get(talentId)!;
-        const values = talent.ParamList.map(toNum).filter(Boolean);
+        const values = talent.paramList.map(toNum).filter(Boolean);
         const rst: IConstellation = {
-          name: toID(talent.NameTextMapHash),
-          localeName: t(talent.NameTextMapHash),
-          desc: toDesc(t(talent.DescTextMapHash)),
+          name: toID(talent.nameTextMapHash),
+          localeName: t(talent.nameTextMapHash),
+          desc: toDesc(t(talent.descTextMapHash)),
           values: values.length ? values : undefined,
         };
         return rst;
       }
       function toSkill(skillId: number) {
         const skill = skillIndex.get(skillId)!;
-        const proud = (skill.ProudSkillGroupId && proudSkillIndex[skill.ProudSkillGroupId]) || undefined;
+        const proud = (skill.proudSkillGroupId && proudSkillIndex[skill.proudSkillGroupId]) || undefined;
         const rst: ISkill = {
-          name: toID(skill.NameTextMapHash),
-          localeName: t(skill.NameTextMapHash),
-          desc: toDesc(t(skill.DescTextMapHash)),
-          cd: toNum(skill.CdTime || 0),
+          name: toID(skill.nameTextMapHash),
+          localeName: t(skill.nameTextMapHash),
+          desc: toDesc(t(skill.descTextMapHash)),
+          cd: toNum(skill.cdTime || 0),
         };
-        if (skill.CostElemVal) rst.energyCost = skill.CostElemVal;
+        if (skill.costElemVal) rst.energyCost = skill.costElemVal;
         if (proud) {
-          const tplLen = proud[0].ParamDescList.map(v => toText(v)).findIndex(v => v === "");
-          const valLen = findLastIndex(proud[0].ParamList, v => v !== 0) + 1;
-          if (tplLen) rst.paramTpls = proud[0].ParamDescList.slice(0, tplLen).map(v => t(v));
-          if (valLen) rst.paramVals = proud.map(lv => lv.ParamList.slice(0, valLen).map(toNum));
-          rst.costItems = proud.slice(1, 10).map(lv => lv.CostItems.filter(v => v.Id).map(toItemStack));
+          const tplLen = proud[0].paramDescList.map(v => toText(v)).findIndex(v => v === "");
+          const valLen = findLastIndex(proud[0].paramList, v => v !== 0) + 1;
+          if (tplLen) rst.paramTpls = proud[0].paramDescList.slice(0, tplLen).map(v => t(v));
+          if (valLen) rst.paramVals = proud.map(lv => lv.paramList.slice(0, valLen).map(toNum));
+          rst.costItems = proud.slice(1, 10).map(lv => lv.costItems.filter(v => v.id).map(toItemStack));
         }
         return rst;
       }
       function toSkillItems(skillId: number) {
         const skill = skillIndex.get(skillId)!;
-        const proud = (skill.ProudSkillGroupId && proudSkillIndex[skill.ProudSkillGroupId]) || undefined;
+        const proud = (skill.proudSkillGroupId && proudSkillIndex[skill.proudSkillGroupId]) || undefined;
         if (proud) {
-          const costItems = proud[8].CostItems.filter(v => v.Id).map(toOverviewItem);
+          const costItems = proud[8].costItems.filter(v => v.id).map(toOverviewItem);
           return costItems;
         }
         return [];
       }
       function toOverviewItem(ci: CostItem) {
-        const item = toItem(ci.Id!);
-        return { id: toID(item.NameTextMapHash), localeName: t(item.NameTextMapHash), rarity: item.RankLevel } as IItem;
+        const item = toItem(ci.id!);
+        return { id: toID(item.nameTextMapHash), localeName: t(item.nameTextMapHash), rarity: item.rankLevel } as IItem;
       }
       function toItemStack(ci: CostItem) {
-        const item = toItem(ci.Id!);
-        return { id: toID(item.NameTextMapHash), localeName: t(item.NameTextMapHash), rarity: item.RankLevel, count: ci.Count } as IItemStack;
+        const item = toItem(ci.id!);
+        return { id: toID(item.nameTextMapHash), localeName: t(item.nameTextMapHash), rarity: item.rankLevel, count: ci.count } as IItemStack;
       }
       function toTalent(proudId: number, needLevel?: number) {
         const proud = proudSkillIndex[proudId][0];
         const rst: ITalent = {
-          name: toID(proud.NameTextMapHash),
-          localeName: t(proud.NameTextMapHash),
-          desc: toDesc(t(proud.DescTextMapHash)),
+          name: toID(proud.nameTextMapHash),
+          localeName: t(proud.nameTextMapHash),
+          desc: toDesc(t(proud.descTextMapHash)),
           unlock: needLevel,
-          unlockDesc: toDesc(t(proud.UnlockDescTextMapHash)) || undefined,
+          unlockDesc: toDesc(t(proud.unlockDescTextMapHash)) || undefined,
         };
         if (proud) {
-          const tplLen = proud.ParamDescList.map(v => toText(v)).findIndex(v => v === "");
-          const valLen = proud.ParamList.findIndex(v => v === 0);
-          if (tplLen) rst.tpl = proud.ParamDescList.slice(0, tplLen).map(v => t(v));
-          if (valLen) rst.values = proud.ParamList.slice(0, valLen).map(toNum);
+          const tplLen = proud.paramDescList.map(v => toText(v)).findIndex(v => v === "");
+          const valLen = proud.paramList.findIndex(v => v === 0);
+          if (tplLen) rst.tpl = proud.paramDescList.slice(0, tplLen).map(v => t(v));
+          if (valLen) rst.values = proud.paramList.slice(0, valLen).map(toNum);
         }
         return rst;
-      }
-
-      function toRegion(char: AvatarExcelConfigData, tags: ReturnType<typeof toTags>) {
-        const ids = new Set(tags.map(v => v.TagID));
-        if (ids.has(1001)) return Region.Mondstadt;
-        if (ids.has(1002)) return Region.Liyue;
-        if (ids.has(1003)) return Region.Inazuma;
-        if (ids.has(1004)) return Region.Sumeru;
-        if (ids.has(1005)) return Region.Fontaine;
-        if (ids.has(1006)) return Region.Natlan;
-        if (ids.has(1007)) return Region.Snezhnaya;
-        if (toID(char.NameTextMapHash) === "Traveler") return Region.Unknown;
-        return Region.Snezhnaya;
       }
 
       function toBodyType(raw: string) {
@@ -214,179 +209,233 @@ async function parseChar() {
       }
 
       function toRarity(raw: string) {
-        const nm: Dict<number> = { QUALITY_BLUE: 3, QUALITY_PURPLE: 4, QUALITY_ORANGE: 5 };
+        const nm: Dict<number> = { QUALITY_BLUE: 3, QUALITY_PURPLE: 4, QUALITY_ORANGE: 5, QUALITY_ORANGE_SP: 5 };
         return nm[raw];
       }
     });
   }
+
+  const charjson = charList.map(v => {
+    const wtype: { [x: number]: string } = {
+      [WeaponType.Sword]: "单手剑",
+      [WeaponType.Polearm]: "长枪",
+      [WeaponType.Catalyst]: "法器",
+      [WeaponType.Bow]: "弓",
+      [WeaponType.Claymore]: "双手剑",
+    };
+    const etype: { [x: number]: string } = {
+      1: "风",
+      2: "岩",
+      3: "雷",
+      4: "草",
+      5: "水",
+      6: "火",
+      7: "冰",
+    };
+    return {
+      角色: v.localeName,
+      英文: v.id,
+      生命: v.baseHP,
+      防御: v.baseDEF,
+      攻击: v.baseATK,
+      武器: wtype[v.weapon],
+      属性: etype[v.element],
+    };
+  });
+
+  // 表格
+  {
+    const sheet = xlsx.utils.json_to_sheet(charjson);
+    const book = xlsx.utils.book_new();
+    xlsx.utils.book_append_sheet(book, sheet);
+    await fs.ensureDir("dist/char");
+    await xlsx.writeFile(book, "dist/char/char.xlsx");
+  }
+
+  function toRegion(char: AvatarExcelConfigData, tags: ReturnType<typeof toTags>) {
+    try {
+      const ids = new Set(tags.map(v => v.tagID));
+      if (ids.has(1001)) return Region.Mondstadt;
+      if (ids.has(1002)) return Region.Liyue;
+      if (ids.has(1003)) return Region.Inazuma;
+      if (ids.has(1004)) return Region.Sumeru;
+      if (ids.has(1005)) return Region.Fontaine;
+      if (ids.has(1006)) return Region.Natlan;
+      if (ids.has(1007)) return Region.Snezhnaya;
+    } catch {
+      console.log(tags);
+    }
+    if (toID(char.nameTextMapHash) === "Traveler") return Region.Unknown;
+    return Region.Snezhnaya;
+  }
 }
 
 interface AvatarExcelConfigData {
-  BodyType: string;
-  ScriptDataPathHashSuffix: number;
-  ScriptDataPathHashPre: number;
-  IconName: string;
-  SideIconName: string;
-  QualityType: string;
-  ChargeEfficiency: number;
-  CombatConfigHashSuffix: number;
-  CombatConfigHashPre: number;
-  InitialWeapon: number;
-  WeaponType: string;
-  ManekinPathHashSuffix: number;
-  ManekinPathHashPre: number;
-  ImageName: string;
-  GachaCardNameHashSuffix: number;
-  GachaCardNameHashPre: number;
-  GachaImageNameHashSuffix: number;
-  GachaImageNameHashPre: number;
-  CutsceneShow: string;
-  SkillDepotId: number;
-  StaminaRecoverSpeed: number;
-  CandSkillDepotIds: number[];
-  ManekinJsonConfigHashSuffix: number;
-  ManekinJsonConfigHashPre: number;
-  ManekinMotionConfig: number;
-  DescTextMapHash: number;
-  AvatarIdentityType: string;
-  AvatarPromoteId: number;
-  AvatarPromoteRewardLevelList: number[];
-  AvatarPromoteRewardIdList: number[];
-  FeatureTagGroupID: number;
-  InfoDescTextMapHash: number;
-  HpBase: number;
-  AttackBase: number;
-  DefenseBase: number;
-  Critical: number;
-  CriticalHurt: number;
-  PropGrowCurves: PropGrowCurve[];
-  PrefabPathRagdollHashSuffix: number;
-  PrefabPathRagdollHashPre: number;
-  Id: number;
-  NameTextMapHash: number;
-  PrefabPathHashSuffix: number;
-  PrefabPathHashPre: number;
-  PrefabPathRemoteHashSuffix: number;
-  PrefabPathRemoteHashPre: number;
-  ControllerPathHashSuffix: number;
-  ControllerPathHashPre: number;
-  ControllerPathRemoteHashSuffix: number;
-  ControllerPathRemoteHashPre: number;
+  bodyType: string;
+  scriptDataPathHashSuffix: number;
+  scriptDataPathHashPre: number;
+  iconName: string;
+  sideIconName: string;
+  qualityType: string;
+  chargeEfficiency: number;
+  combatConfigHashSuffix: number;
+  combatConfigHashPre: number;
+  initialWeapon: number;
+  weaponType: string;
+  manekinPathHashSuffix: number;
+  manekinPathHashPre: number;
+  imageName: string;
+  gachaCardNameHashSuffix: number;
+  gachaCardNameHashPre: number;
+  gachaImageNameHashSuffix: number;
+  gachaImageNameHashPre: number;
+  cutsceneShow: string;
+  skillDepotId: number;
+  staminaRecoverSpeed: number;
+  candSkillDepotIds: number[];
+  manekinJsonConfigHashSuffix: number;
+  manekinJsonConfigHashPre: number;
+  manekinMotionConfig: number;
+  descTextMapHash: number;
+  avatarIdentityType: string;
+  avatarPromoteId: number;
+  avatarPromoteRewardLevelList: number[];
+  avatarPromoteRewardIdList: number[];
+  featureTagGroupID: number;
+  infoDescTextMapHash: number;
+  hpBase: number;
+  attackBase: number;
+  defenseBase: number;
+  critical: number;
+  criticalHurt: number;
+  propGrowCurves: PropGrowCurve[];
+  prefabPathRagdollHashSuffix: number;
+  prefabPathRagdollHashPre: number;
+  id: number;
+  nameTextMapHash: number;
+  prefabPathHashSuffix: number;
+  prefabPathHashPre: number;
+  prefabPathRemoteHashSuffix: number;
+  prefabPathRemoteHashPre: number;
+  controllerPathHashSuffix: number;
+  controllerPathHashPre: number;
+  controllerPathRemoteHashSuffix: number;
+  controllerPathRemoteHashPre: number;
   LODPatternName: string;
-  UseType: string;
-  IsRangeAttack?: boolean;
+  useType: string;
+  isRangeAttack?: boolean;
 }
 
 interface PropGrowCurve {
-  Type: string;
-  GrowCurve: string;
+  type: string;
+  growCurve: string;
 }
 
 interface AvatarSkillExcelConfigData {
-  Id: number;
-  NameTextMapHash: number;
-  AbilityName: string;
-  DescTextMapHash: number;
-  SkillIcon: string;
-  CostStamina: number;
-  MaxChargeNum: number;
-  LockShape: string;
-  LockWeightParams: number[];
-  IsAttackCameraLock: boolean;
-  BuffIcon: string;
-  GlobalValueKey: string;
-  CdTime?: number;
-  TriggerID?: number;
-  DragType: string;
-  ShowIconArrow?: boolean;
-  ProudSkillGroupId?: number;
-  CostElemType: string;
-  CostElemVal?: number;
-  IgnoreCDMinusRatio?: boolean;
-  IsRanged?: boolean;
-  NeedMonitor: string;
-  DefaultLocked?: boolean;
-  NeedStore?: boolean;
-  CdSlot?: number;
-  ForceCanDoSkill?: boolean;
-  EnergyMin?: number;
+  id: number;
+  nameTextMapHash: number;
+  abilityName: string;
+  descTextMapHash: number;
+  skillIcon: string;
+  costStamina: number;
+  maxChargeNum: number;
+  lockShape: string;
+  lockWeightParams: number[];
+  isAttackCameraLock: boolean;
+  buffIcon: string;
+  globalValueKey: string;
+  cdTime?: number;
+  triggerID?: number;
+  dragType: string;
+  showIconArrow?: boolean;
+  proudSkillGroupId?: number;
+  costElemType: string;
+  costElemVal?: number;
+  ignoreCDMinusRatio?: boolean;
+  isRanged?: boolean;
+  needMonitor: string;
+  defaultLocked?: boolean;
+  needStore?: boolean;
+  cdSlot?: number;
+  forceCanDoSkill?: boolean;
+  energyMin?: number;
 }
 
 interface AvatarSkillDepotExcelConfigData {
-  Id: number;
-  EnergySkill: number;
-  Skills: number[];
-  SubSkills: number[];
-  ExtraAbilities: string[];
-  Talents: number[];
-  TalentStarName: string;
-  InherentProudSkillOpens: InherentProudSkillOpen[];
-  SkillDepotAbilityGroup: string;
-  LeaderTalent?: number;
-  AttackModeSkill?: number;
+  id: number;
+  energySkill: number;
+  skills: number[];
+  subSkills: number[];
+  extraAbilities: string[];
+  talents: number[];
+  talentStarName: string;
+  inherentProudSkillOpens: InherentProudSkillOpen[];
+  skillDepotAbilityGroup: string;
+  leaderTalent?: number;
+  attackModeSkill?: number;
 }
 
 interface InherentProudSkillOpen {
-  ProudSkillGroupId?: number;
-  NeedAvatarPromoteLevel?: number;
+  proudSkillGroupId?: number;
+  needAvatarPromoteLevel?: number;
 }
 
 interface InherentProudSkillOpen {
-  ProudSkillGroupId?: number;
-  NeedAvatarPromoteLevel?: number;
+  proudSkillGroupId?: number;
+  needAvatarPromoteLevel?: number;
 }
 interface AvatarPromoteExcelConfigData {
-  AvatarPromoteId: number;
-  PromoteAudio: string;
-  CostItems: CostItem[];
-  UnlockMaxLevel: number;
-  AddProps: AddProp[];
-  PromoteLevel?: number;
-  ScoinCost?: number;
-  RequiredPlayerLevel?: number;
+  avatarPromoteId: number;
+  promoteAudio: string;
+  costItems: CostItem[];
+  unlockMaxLevel: number;
+  addProps: AddProp[];
+  promoteLevel?: number;
+  scoinCost?: number;
+  requiredPlayerLevel?: number;
 }
 
 interface CostItem {
-  Id?: number;
-  Count?: number;
+  id?: number;
+  count?: number;
 }
 
 interface AvatarTalentExcelConfigData {
-  TalentId: number;
-  NameTextMapHash: number;
-  DescTextMapHash: number;
-  Icon: string;
-  MainCostItemId: number;
-  MainCostItemCount: number;
-  OpenConfig: string;
-  AddProps: AddProp[];
-  ParamList: number[];
-  PrevTalent?: number;
+  talentId: number;
+  nameTextMapHash: number;
+  descTextMapHash: number;
+  icon: string;
+  mainCostItemId: number;
+  mainCostItemCount: number;
+  openConfig: string;
+  addProps: AddProp[];
+  paramList: number[];
+  prevTalent?: number;
 }
 
 interface AddProp {
-  PropType?: string;
-  Value?: number;
+  propType?: string;
+  value?: number;
 }
 
 interface ProudSkillExcelConfigData {
-  ProudSkillId: number;
-  ProudSkillGroupId: number;
-  Level: number;
-  ProudSkillType: number;
-  NameTextMapHash: number;
-  DescTextMapHash: number;
-  UnlockDescTextMapHash: number;
-  Icon: string;
-  CostItems: CostItem[];
-  FilterConds: string[];
-  BreakLevel: number;
-  ParamDescList: number[];
-  LifeEffectParams: string[];
-  OpenConfig: string;
-  AddProps: AddProp[];
-  ParamList: number[];
-  LifeEffectType: string;
-  CoinCost?: number;
-  EffectiveForTeam?: number;
+  proudSkillId: number;
+  proudSkillGroupId: number;
+  level: number;
+  proudSkillType: number;
+  nameTextMapHash: number;
+  descTextMapHash: number;
+  unlockDescTextMapHash: number;
+  icon: string;
+  costItems: CostItem[];
+  filterConds: string[];
+  breakLevel: number;
+  paramDescList: number[];
+  lifeEffectParams: string[];
+  openConfig: string;
+  addProps: AddProp[];
+  paramList: number[];
+  lifeEffectType: string;
+  coinCost?: number;
+  effectiveForTeam?: number;
 }
